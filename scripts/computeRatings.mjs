@@ -69,13 +69,26 @@ async function main() {
   for (const [n, e] of elo.entries()) {
     if ((games.get(n) || 0) >= 8) byName[n] = toRating(e);
   }
+  // Mezcla Elo (forma, data-driven) con el prior hand-tuned de ratings.js (calibración global
+  // entre confederaciones). El Elo "crudo" infla a equipos que juegan aislados en su confederación
+  // (p.ej. AFC), así que el prior corrige eso. BLEND: 0 = solo prior, 1 = solo Elo.
+  const BLEND = 0.5;
+  const blendRating = (eloScaled, id) => {
+    const prior = getRating(id);
+    return Math.max(42, Math.min(94, Math.round(BLEND * eloScaled + (1 - BLEND) * prior)));
+  };
+
   // byId para las 48 (invirtiendo repoNameToId sobre los nombres del repo).
   const idToName = new Map();
   for (const n of elo.keys()) { const id = repoNameToId(n); if (id != null) idToName.set(id, n); }
   const byId = {};
   for (const t of WORLD_CUP_TEAMS) {
     const n = idToName.get(t.id);
-    if (n) byId[t.id] = toRating(elo.get(n));
+    if (n) {
+      const blended = blendRating(toRating(elo.get(n)), t.id);
+      byId[t.id] = blended;
+      byName[n] = blended; // consistencia: mismo valor cuando el mundialista es rival de otro
+    }
   }
 
   fs.mkdirSync(DATA_DIR, { recursive: true });
