@@ -1,0 +1,21 @@
+{
+  "name": "predictor-mundial",
+  "version": "1.0.0",
+  "description": "Predictor de resultados del Mundial de futbol: probabilidades de resultado y estadisticas (goles, tarjetas, tiros al arco) combinando modelo Poisson y heuristica.",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node --env-file=.env server/index.js",
+    "start:noenv": "node server/index.js",
+    "dev": "node --env-file=.env --watch server/index.js",
+    "import:intl": "node scripts/importIntlResults.mjs",
+    "compute:ratings": "node scripts/computeRatings.mjs",
+    "build:dataset": "node --env-file=.env scripts/buildDataset.mjs"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=20.6.0"
+  }
+}

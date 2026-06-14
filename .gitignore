@@ -1,0 +1,21 @@
+# Secretos / entorno (NO subir: contiene la API key real)
+.env
+.env.local
+
+# Dependencias
+node_modules/
+
+# Cache de respuestas de la API (se regenera solo)
+cache/
+
+# Config local de Claude Code
+.claude/
+
+# Snapshot por API opcional (se regenera con npm run build:dataset)
+data/teams.csv
+data/matches.csv
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log
