@@ -9,13 +9,14 @@ export const config = {
   leagueAverageGoals: 1.35,
 };
 
-export const DEFAULT_RATING = 58;
-export const REFERENCE_RATING = 75;
+// Escala de ratings 0-1000 (los ratings vienen de data/ratings.json en esa escala).
+export const DEFAULT_RATING = 580;
+export const REFERENCE_RATING = 750;
 
 const TIERS = [
-  { tier: 1, label: 'Elite', min: 84 },
-  { tier: 2, label: 'Alta', min: 76 },
-  { tier: 3, label: 'Media', min: 68 },
+  { tier: 1, label: 'Elite', min: 840 },
+  { tier: 2, label: 'Alta', min: 760 },
+  { tier: 3, label: 'Media', min: 680 },
   { tier: 4, label: 'Baja', min: 0 },
 ];
 

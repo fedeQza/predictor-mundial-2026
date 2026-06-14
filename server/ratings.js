@@ -39,21 +39,26 @@ export const RATINGS = {
   10983: 52, 5536: 45,
 };
 
+// La escala publica es 0-1000 (mas fina). La tabla RATINGS de arriba esta en 0-100 por
+// legibilidad; getRating la expone x10. Los ratings data-driven (data/ratings.json) ya vienen
+// en 0-1000, asi que todo el codigo trabaja en esa escala.
+
 // Rating por defecto para una seleccion desconocida (rival no listado).
-export const DEFAULT_RATING = 58;
+export const DEFAULT_RATING = 580;
 
 // Rating de referencia (aprox. el promedio de una seleccion de nivel mundialista).
-export const REFERENCE_RATING = 75;
+export const REFERENCE_RATING = 750;
 
 export function getRating(id) {
-  return RATINGS[Number(id)] ?? DEFAULT_RATING;
+  const base = RATINGS[Number(id)];
+  return base != null ? base * 10 : DEFAULT_RATING;
 }
 
-// Cuatro niveles/grupos de calidad.
+// Cuatro niveles/grupos de calidad (escala 0-1000).
 const TIERS = [
-  { tier: 1, label: 'Elite', min: 84 },
-  { tier: 2, label: 'Alta', min: 76 },
-  { tier: 3, label: 'Media', min: 68 },
+  { tier: 1, label: 'Elite', min: 840 },
+  { tier: 2, label: 'Alta', min: 760 },
+  { tier: 3, label: 'Media', min: 680 },
   { tier: 4, label: 'Baja', min: 0 },
 ];
 

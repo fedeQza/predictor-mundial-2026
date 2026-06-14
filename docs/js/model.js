@@ -37,8 +37,8 @@ function computeGoalLambdas(teamA, teamB, h2h) {
     lambdaA *= h2hMultiplier(h2h.avgGoalsA, h2h.count);
     lambdaB *= h2hMultiplier(h2h.avgGoalsB, h2h.count);
   }
-  const ratingA = teamA.rating || 70;
-  const ratingB = teamB.rating || 70;
+  const ratingA = teamA.rating || 700;
+  const ratingB = teamB.rating || 700;
   lambdaA *= 1 + (ratingA / ratingB - 1) * config.ratingWeight;
   lambdaB *= 1 + (ratingB / ratingA - 1) * config.ratingWeight;
   lambdaA *= 1 + config.homeAdvantage;

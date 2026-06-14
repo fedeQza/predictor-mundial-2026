@@ -37,7 +37,7 @@ function buildProfile(team) {
   const rnd = seeded(team.id);
   // Fuerza derivada principalmente del rating de calidad (con algo de azar determinista).
   const rating = getRating(team.id);
-  const ratingStrength = Math.max(0, Math.min(1, (rating - 55) / (92 - 55)));
+  const ratingStrength = Math.max(0, Math.min(1, (rating - 550) / (920 - 550)));
   const strength = 0.8 * ratingStrength + 0.2 * rnd();
 
   const gf = round(0.8 + strength * 1.8);   // ~0.8 .. 2.6 goles a favor

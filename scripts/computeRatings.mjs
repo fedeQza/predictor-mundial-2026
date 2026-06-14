@@ -13,6 +13,14 @@ import { getRating } from '../server/ratings.js';
 
 const SOURCE_URL = 'https://raw.githubusercontent.com/martj42/international_results/master/results.csv';
 const OUT = path.join(DATA_DIR, 'ratings.json');
+const SINCE = '2010-01-01';
+
+// Peso por recencia: los partidos recientes valen mas (refleja "que tan bien esta HOY").
+// Un partido de hace ~13 años pesa ~0.4; uno de este año, 1.0.
+function recencyWeight(dateStr) {
+  const ageYears = (Date.now() - new Date(dateStr).getTime()) / (365.25 * 24 * 3600 * 1000);
+  return Math.max(0.4, 1 - ageYears * 0.045);
+}
 
 // Importancia (K base) por tipo de torneo: un Mundial pesa más que un amistoso.
 function kBase(tournament) {
@@ -33,9 +41,9 @@ async function main() {
   const res = await fetch(SOURCE_URL);
   if (!res.ok) { console.error(`No se pudo descargar (${res.status}).`); process.exit(1); }
   const rows = parseCsv(await res.text())
-    .filter((r) => r.date && r.home_score !== 'NA' && r.away_score !== 'NA' && r.home_score !== '')
+    .filter((r) => r.date && r.date >= SINCE && r.home_score !== 'NA' && r.away_score !== 'NA' && r.home_score !== '')
     .sort((a, b) => (a.date < b.date ? -1 : 1));
-  console.log(`Partidos para el Elo: ${rows.length}`);
+  console.log(`Partidos para el Elo (desde ${SINCE}): ${rows.length}`);
 
   const elo = new Map();
   const games = new Map();
@@ -52,18 +60,18 @@ async function main() {
     const sh = hs > as ? 1 : hs === as ? 0.5 : 0;
     const gd = Math.abs(hs - as);
     const gmult = gd <= 1 ? 1 : gd === 2 ? 1.5 : (11 + gd) / 8; // peso por diferencia de goles
-    const k = kBase(r.tournament) * gmult;
+    const k = kBase(r.tournament) * gmult * recencyWeight(r.date);
     elo.set(h, rh + k * (sh - eh));
     elo.set(a, ra + k * ((1 - sh) - (1 - eh)));
     bump(games, h); bump(games, a);
   }
 
-  // Calibración del mapeo Elo -> escala 45-94. Anclas: elo 1300 -> 45; topElo -> 92.
+  // Calibración del mapeo Elo -> escala 0-1000. Anclas: elo 1300 -> 450; topElo -> 920.
   const eligible = [...elo.entries()].filter(([n]) => (games.get(n) || 0) >= 20);
   const topElo = Math.max(...eligible.map(([, v]) => v));
-  const LO_ELO = 1300, LO_R = 45, HI_R = 92;
+  const LO_ELO = 1300, LO_R = 450, HI_R = 920;
   const slope = (HI_R - LO_R) / (topElo - LO_ELO);
-  const toRating = (e) => Math.max(42, Math.min(94, Math.round(LO_R + (e - LO_ELO) * slope)));
+  const toRating = (e) => Math.max(420, Math.min(940, Math.round(LO_R + (e - LO_ELO) * slope)));
 
   const byName = {};
   for (const [n, e] of elo.entries()) {
@@ -74,8 +82,8 @@ async function main() {
   // (p.ej. AFC), así que el prior corrige eso. BLEND: 0 = solo prior, 1 = solo Elo.
   const BLEND = 0.5;
   const blendRating = (eloScaled, id) => {
-    const prior = getRating(id);
-    return Math.max(42, Math.min(94, Math.round(BLEND * eloScaled + (1 - BLEND) * prior)));
+    const prior = getRating(id); // ya en escala 0-1000 (getRating expone x10)
+    return Math.max(420, Math.min(940, Math.round(BLEND * eloScaled + (1 - BLEND) * prior)));
   };
 
   // byId para las 48 (invirtiendo repoNameToId sobre los nombres del repo).
@@ -95,7 +103,7 @@ async function main() {
   fs.writeFileSync(OUT, JSON.stringify({ byId, byName }, null, 0));
 
   // Reporte: las 48 ordenadas, nuevo vs viejo.
-  console.log(`\ntopElo=${Math.round(topElo)} -> rating 92.  Escala: elo ${LO_ELO}->45.\n`);
+  console.log(`\ntopElo=${Math.round(topElo)} -> ${HI_R}.  Escala 0-1000 (elo ${LO_ELO} -> ${LO_R}). Mezcla ${BLEND} Elo / ${(1 - BLEND).toFixed(2)} prior.\n`);
   const report = WORLD_CUP_TEAMS
     .map((t) => ({ t, n: idToName.get(t.id), e: Math.round(elo.get(idToName.get(t.id)) || 1500), nuevo: byId[t.id], viejo: getRating(t.id) }))
     .sort((x, y) => y.nuevo - x.nuevo);

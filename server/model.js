@@ -80,8 +80,8 @@ function computeGoalLambdas(teamA, teamB, h2h, w = {}) {
   }
 
   // Peso directo de la calidad: si A tiene mejor rating que B, su lambda sube (y baja la de B).
-  const ratingA = teamA.rating || 70;
-  const ratingB = teamB.rating || 70;
+  const ratingA = teamA.rating || 700;
+  const ratingB = teamB.rating || 700;
   lambdaA *= 1 + (ratingA / ratingB - 1) * ratingWeight;
   lambdaB *= 1 + (ratingB / ratingA - 1) * ratingWeight;
 
