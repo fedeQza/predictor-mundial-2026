@@ -120,6 +120,19 @@ Escribe `data/ratings.json` (rating de ~290 selecciones). Eso alimenta tanto el 
 esperados (`RATING_WEIGHT`, subilo para que la calidad pese más). Si el archivo no existe, se usan
 los ratings de referencia de `server/ratings.js`.
 
+## Versión web (GitHub Pages)
+
+Hay una versión **100% estática** en `docs/` (el modelo Poisson y la carga de datos corren en el
+navegador) publicada en GitHub Pages: <https://fedeqza.github.io/predictor-mundial-2026/>. Cubre
+goles, forma, head-to-head y resultados/próximo del Mundial 2026. Las **stats detalladas**
+(tarjetas, tiros, córners) no están en la web (requieren la API) — para eso, cloná el repo y corré
+la app localmente.
+
+El sitio se **auto-actualiza**: el workflow `.github/workflows/refresh-data.yml` corre cada 6 horas,
+re-importa los resultados (`import:intl`), recalcula los ratings (`compute:ratings`), los copia a
+`docs/data/` y commitea; Pages redeploya solo. También se puede disparar a mano desde la pestaña
+**Actions**.
+
 ## Dataset local (CSV) — consumir sin límites de API
 
 Para no depender de API-Football en cada consulta (límite de 10 req/min y 100 req/día, y el riesgo
