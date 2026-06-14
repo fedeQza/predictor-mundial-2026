@@ -31,10 +31,22 @@ app.get('/api/teams', (req, res) => {
   res.json({ teams: getTeamsList() });
 });
 
+// Lee pesos del modelo desde la query (sliders de la interfaz). Solo toma los validos.
+function parseWeights(q) {
+  const w = {};
+  const map = { wForm: 'formWeight', wRating: 'ratingWeight', wH2h: 'h2hWeight', wOpp: 'opponentWeight' };
+  for (const [param, key] of Object.entries(map)) {
+    const v = parseFloat(q[param]);
+    if (Number.isFinite(v) && v >= 0 && v <= 1) w[key] = v;
+  }
+  return w;
+}
+
 // Prediccion principal.
 app.get('/api/predict', async (req, res) => {
   const { teamA, teamB } = req.query;
   const metric = req.query.metric || 'goals';
+  const w = parseWeights(req.query);
 
   if (!teamA || !teamB) {
     return res.status(400).json({ error: 'Faltan los parametros teamA y teamB.' });
@@ -43,8 +55,8 @@ app.get('/api/predict', async (req, res) => {
   try {
     // Se piden los perfiles en paralelo.
     const [profileA, profileB] = await Promise.all([
-      getTeamProfile(teamA),
-      getTeamProfile(teamB),
+      getTeamProfile(teamA, { opponentWeight: w.opponentWeight }),
+      getTeamProfile(teamB, { opponentWeight: w.opponentWeight }),
     ]);
 
     if (profileA.id === profileB.id) {
@@ -60,7 +72,7 @@ app.get('/api/predict', async (req, res) => {
       console.warn(`[predict] H2H no disponible (${err.message}); se usa historial vacio.`);
     }
 
-    const result = predict(profileA, profileB, h2h, metric);
+    const result = predict(profileA, profileB, h2h, metric, w);
 
     res.json({ demoMode: config.demoMode, prediction: result });
   } catch (err) {
@@ -75,8 +87,12 @@ app.get('/api/enrich', async (req, res) => {
   if (!teamA || !teamB) {
     return res.status(400).json({ error: 'Faltan los parametros teamA y teamB.' });
   }
+  const w = parseWeights(req.query);
   try {
-    const [profileA, profileB] = await Promise.all([getTeamProfile(teamA), getTeamProfile(teamB)]);
+    const [profileA, profileB] = await Promise.all([
+      getTeamProfile(teamA, { opponentWeight: w.opponentWeight }),
+      getTeamProfile(teamB, { opponentWeight: w.opponentWeight }),
+    ]);
     // Stats reales desde la API (cuesta cuota; puede fallar si la key esta sin cuota/suspendida).
     const [statsA, statsB] = await Promise.all([fetchTeamStats(teamA), fetchTeamStats(teamB)]);
     const pick = (s) => ({
@@ -89,7 +105,7 @@ app.get('/api/enrich', async (req, res) => {
     let h2h = { count: 0, avgGoalsA: 0, avgGoalsB: 0, matches: [] };
     try { h2h = await getH2H(profileA, profileB); } catch { /* H2H opcional */ }
 
-    const result = predict(profileA, profileB, h2h, 'goals');
+    const result = predict(profileA, profileB, h2h, 'goals', w);
     const metrics = result.allMetrics.filter((m) => m.key !== 'goals');
     res.json({ metrics, teams: { a: profileA.name, b: profileB.name } });
   } catch (err) {

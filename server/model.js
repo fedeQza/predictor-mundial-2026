@@ -39,24 +39,28 @@ function pct(n) {
 
 // Devuelve un multiplicador alrededor de 1 a partir de la forma reciente del equipo.
 // formPoints va de 0 (perdio todo) a 1 (gano todo); 0.5 es neutral.
-function formMultiplier(formPoints) {
+function formMultiplier(formPoints, formWeight) {
   // Con FORM_WEIGHT=0.25, un equipo en racha perfecta multiplica ~1.25, uno hundido ~0.75.
-  return 1 + (formPoints - 0.5) * 2 * config.formWeight;
+  return 1 + (formPoints - 0.5) * 2 * formWeight;
 }
 
 // Sesgo por head-to-head: compara los goles historicos del equipo contra ese rival
 // con el baseline de la liga.
-function h2hMultiplier(avgGoalsInH2H, sampleCount) {
+function h2hMultiplier(avgGoalsInH2H, sampleCount, h2hWeight) {
   if (!sampleCount || sampleCount < 2) return 1; // muestra insuficiente -> sin ajuste
   const ratio = avgGoalsInH2H / config.leagueAverageGoals;
   // limitar el efecto para no distorsionar con muestras chicas
   const clamped = Math.max(0.5, Math.min(1.5, ratio));
-  return 1 + (clamped - 1) * config.h2hWeight;
+  return 1 + (clamped - 1) * h2hWeight;
 }
 
 // --- prediccion de goles (resultado del partido) --------------------------------
 
-function computeGoalLambdas(teamA, teamB, h2h) {
+function computeGoalLambdas(teamA, teamB, h2h, w = {}) {
+  const formWeight = w.formWeight ?? config.formWeight;
+  const h2hWeight = w.h2hWeight ?? config.h2hWeight;
+  const ratingWeight = w.ratingWeight ?? config.ratingWeight;
+
   // Base: ataque de uno + defensa del otro, anclado al promedio de liga.
   let lambdaA = (teamA.avgGoalsFor + teamB.avgGoalsAgainst) / 2;
   let lambdaB = (teamB.avgGoalsFor + teamA.avgGoalsAgainst) / 2;
@@ -66,20 +70,20 @@ function computeGoalLambdas(teamA, teamB, h2h) {
   lambdaB = 0.8 * lambdaB + 0.2 * config.leagueAverageGoals;
 
   // Ajuste por forma reciente.
-  lambdaA *= formMultiplier(teamA.formPoints);
-  lambdaB *= formMultiplier(teamB.formPoints);
+  lambdaA *= formMultiplier(teamA.formPoints, formWeight);
+  lambdaB *= formMultiplier(teamB.formPoints, formWeight);
 
   // Ajuste por head-to-head.
   if (h2h && h2h.count >= 2) {
-    lambdaA *= h2hMultiplier(h2h.avgGoalsA, h2h.count);
-    lambdaB *= h2hMultiplier(h2h.avgGoalsB, h2h.count);
+    lambdaA *= h2hMultiplier(h2h.avgGoalsA, h2h.count, h2hWeight);
+    lambdaB *= h2hMultiplier(h2h.avgGoalsB, h2h.count, h2hWeight);
   }
 
   // Peso directo de la calidad: si A tiene mejor rating que B, su lambda sube (y baja la de B).
   const ratingA = teamA.rating || 70;
   const ratingB = teamB.rating || 70;
-  lambdaA *= 1 + (ratingA / ratingB - 1) * config.ratingWeight;
-  lambdaB *= 1 + (ratingB / ratingA - 1) * config.ratingWeight;
+  lambdaA *= 1 + (ratingA / ratingB - 1) * ratingWeight;
+  lambdaB *= 1 + (ratingB / ratingA - 1) * ratingWeight;
 
   // Ventaja de local (0 en el Mundial por canchas neutrales).
   lambdaA *= 1 + config.homeAdvantage;
@@ -102,8 +106,8 @@ function buildScoreMatrix(lambdaA, lambdaB) {
   return matrix;
 }
 
-function summarizeGoals(teamA, teamB, h2h) {
-  const { lambdaA, lambdaB } = computeGoalLambdas(teamA, teamB, h2h);
+function summarizeGoals(teamA, teamB, h2h, w) {
+  const { lambdaA, lambdaB } = computeGoalLambdas(teamA, teamB, h2h, w);
   const matrix = buildScoreMatrix(lambdaA, lambdaB);
 
   let pWinA = 0, pDraw = 0, pWinB = 0;
@@ -229,8 +233,8 @@ function metricDetailFor(key, goals, teamA, teamB) {
   return summarizeMetric(key, teamA, teamB);
 }
 
-export function predict(teamA, teamB, h2h, metric = 'goals') {
-  const goals = summarizeGoals(teamA, teamB, h2h);
+export function predict(teamA, teamB, h2h, metric = 'goals', weights = {}) {
+  const goals = summarizeGoals(teamA, teamB, h2h, weights);
 
   const selected = SUPPORTED_METRICS.includes(metric) ? metric : 'goals';
   const metricDetail = metricDetailFor(selected, goals, teamA, teamB);

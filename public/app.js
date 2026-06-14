@@ -4,6 +4,10 @@ const $ = (id) => document.getElementById(id);
 
 const state = { demoMode: false, teams: [], prediction: null, selectedMetric: 'all', enriched: false };
 
+// Sliders de pesos del modelo: [idSlider, idValor].
+const WEIGHT_FIELDS = [['wForm', 'vForm'], ['wRating', 'vRating'], ['wH2h', 'vH2h'], ['wOpp', 'vOpp']];
+const DEFAULT_WEIGHTS = { wForm: 0.25, wRating: 0.40, wH2h: 0.15, wOpp: 0.60 };
+
 // --- inicializacion -------------------------------------------------------------
 
 async function init() {
@@ -17,8 +21,42 @@ async function init() {
   }
 
   await loadTeams();
+  setupWeights();
   $('calcBtn').addEventListener('click', onCalculate);
   $('enrichBtn').addEventListener('click', onEnrich);
+}
+
+// --- pesos del modelo (sliders) -------------------------------------------------
+function updateWeightLabels() {
+  WEIGHT_FIELDS.forEach(([s, v]) => { $(v).textContent = parseFloat($(s).value).toFixed(2); });
+}
+function weightsQuery() {
+  return `&wForm=${$('wForm').value}&wRating=${$('wRating').value}&wH2h=${$('wH2h').value}&wOpp=${$('wOpp').value}`;
+}
+function setupWeights() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('weights') || 'null');
+    if (saved) WEIGHT_FIELDS.forEach(([s]) => { if (saved[s] != null) $(s).value = saved[s]; });
+  } catch { /* ignore */ }
+  updateWeightLabels();
+  WEIGHT_FIELDS.forEach(([s]) => {
+    $(s).addEventListener('input', updateWeightLabels);   // mover = actualiza el número
+    $(s).addEventListener('change', onWeightChange);      // soltar = recalcula
+  });
+  $('resetWeights').addEventListener('click', () => {
+    WEIGHT_FIELDS.forEach(([s]) => { $(s).value = DEFAULT_WEIGHTS[s]; });
+    onWeightChange();
+  });
+}
+function onWeightChange() {
+  updateWeightLabels();
+  try {
+    localStorage.setItem('weights', JSON.stringify({
+      wForm: $('wForm').value, wRating: $('wRating').value, wH2h: $('wH2h').value, wOpp: $('wOpp').value,
+    }));
+  } catch { /* ignore */ }
+  state.enriched = false; // las stats traídas con otros pesos ya no aplican
+  if (state.prediction) onCalculate();
 }
 
 const METRIC_LABELS = {
@@ -116,7 +154,7 @@ async function onCalculate() {
 
   try {
     // El backend siempre calcula todas las metricas; pasamos la elegida igual.
-    const url = `/api/predict?teamA=${encodeURIComponent(teamA)}&teamB=${encodeURIComponent(teamB)}&metric=${encodeURIComponent(metric === 'all' ? 'goals' : metric)}`;
+    const url = `/api/predict?teamA=${encodeURIComponent(teamA)}&teamB=${encodeURIComponent(teamB)}&metric=${encodeURIComponent(metric === 'all' ? 'goals' : metric)}${weightsQuery()}`;
     const res = await fetch(url);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Error en el servidor.');
@@ -232,7 +270,7 @@ async function onEnrich() {
   $('enrichBtn').disabled = true;
   $('enrichNote').textContent = 'Consultando la API… (puede tardar por el límite de la API)';
   try {
-    const res = await fetch(`/api/enrich?teamA=${a}&teamB=${b}`);
+    const res = await fetch(`/api/enrich?teamA=${a}&teamB=${b}${weightsQuery()}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'No se pudo consultar la API.');
     const byKey = new Map((data.metrics || []).map((m) => [m.key, m]));

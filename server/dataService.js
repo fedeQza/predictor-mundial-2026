@@ -23,9 +23,9 @@ export function getTeamsList() {
 
 // Factor de ponderacion de un partido segun el rating del rival.
 // >1 si el rival es mejor que la referencia, <1 si es peor. Se atenua con opponentWeight.
-function opponentFactor(opponentRating) {
+function opponentFactor(opponentRating, opponentWeight = config.opponentWeight) {
   const raw = opponentRating / REFERENCE_RATING;
-  return 1 + (raw - 1) * config.opponentWeight;
+  return 1 + (raw - 1) * opponentWeight;
 }
 
 // Mapeo de los "type" de API-Football a nuestras claves de metricas.
@@ -78,7 +78,9 @@ function resolveTeamId(nameOrId) {
   return match ? { id: match.id, name: match.name } : null;
 }
 
-export async function getTeamProfile(nameOrId) {
+export async function getTeamProfile(nameOrId, opts = {}) {
+  const opponentWeight = opts.opponentWeight ?? config.opponentWeight;
+
   if (config.demoMode) {
     const p = getDemoProfile(nameOrId);
     if (!p) throw new Error(`Equipo no encontrado en demo: "${nameOrId}"`);
@@ -92,7 +94,7 @@ export async function getTeamProfile(nameOrId) {
   // Fuente primaria: dataset de resultados internacionales (repo martj42). Goles/forma/
   // historial reales sin tocar la API. Las stats detalladas se traen aparte (boton "Consultar API").
   if (config.useIntl && hasIntlTeam(teamId)) {
-    const intlProfile = getIntlProfile(teamId);
+    const intlProfile = getIntlProfile(teamId, opponentWeight);
     if (intlProfile) return intlProfile;
   }
 
@@ -141,7 +143,7 @@ export async function getTeamProfile(nameOrId) {
     // recibir goles de un debil penaliza mas (se divide por el factor).
     const opponentTeam = isHome ? f.teams.away : f.teams.home;
     const oppRating = getRating(opponentTeam.id);
-    const factor = opponentFactor(oppRating);
+    const factor = opponentFactor(oppRating, opponentWeight);
     adjGoalsFor.push(gf * factor);
     adjGoalsAgainst.push(ga / factor);
 
@@ -195,7 +197,7 @@ export async function getTeamProfile(nameOrId) {
           const oppRating = lt.opponentApiId != null
             ? getRating(lt.opponentApiId)
             : ratingByName(lt.opponent);
-          const factor = opponentFactor(oppRating);
+          const factor = opponentFactor(oppRating, opponentWeight);
 
           adjGoalsFor.unshift(lt.goalsFor * factor);
           adjGoalsAgainst.unshift(lt.goalsAgainst / factor);

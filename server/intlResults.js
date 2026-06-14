@@ -63,8 +63,8 @@ function average(nums) {
   const v = nums.filter((n) => typeof n === 'number' && Number.isFinite(n));
   return v.length ? v.reduce((s, n) => s + n, 0) / v.length : 0;
 }
-function opponentFactor(opponentRating) {
-  return 1 + (opponentRating / REFERENCE_RATING - 1) * config.opponentWeight;
+function opponentFactor(opponentRating, opponentWeight) {
+  return 1 + (opponentRating / REFERENCE_RATING - 1) * opponentWeight;
 }
 function ratingByRepoName(name) {
   // 1) rating data-driven (Elo) por nombre; 2) hand-tuned por id si es mundialista; 3) default.
@@ -76,7 +76,7 @@ function ratingByRepoName(name) {
 const isPlayed = (r) => r.home_score !== 'NA' && r.away_score !== 'NA' && r.home_score !== '' && r.away_score !== '';
 
 // --- perfil --------------------------------------------------------------------
-export function getIntlProfile(id) {
+export function getIntlProfile(id, opponentWeight = config.opponentWeight) {
   loadIntl();
   const teamId = Number(id);
   const team = WORLD_CUP_TEAMS.find((t) => t.id === teamId);
@@ -101,7 +101,7 @@ export function getIntlProfile(id) {
     else if (gf < ga) result = 'L';
 
     const oppRating = ratingByRepoName(opponent);
-    const factor = opponentFactor(oppRating);
+    const factor = opponentFactor(oppRating, opponentWeight);
     adjGoalsFor.push(gf * factor);
     adjGoalsAgainst.push(ga / factor);
     formPointsArr.push(result === 'W' ? 3 : result === 'D' ? 1 : 0);

@@ -2,9 +2,19 @@
 
 import { loadData, getTeamsList, getProfile, getH2H } from './intl.js';
 import { predict, SUPPORTED_METRICS } from './model.js';
+import { config } from './config.js';
 
 const $ = (id) => document.getElementById(id);
 const state = { teams: [], prediction: null, selectedMetric: 'all' };
+
+// Sliders de pesos: [idSlider, idValor, claveEnConfig]. Editan el modelo en vivo.
+const WEIGHT_FIELDS = [
+  ['wForm', 'vForm', 'formWeight'],
+  ['wRating', 'vRating', 'ratingWeight'],
+  ['wH2h', 'vH2h', 'h2hWeight'],
+  ['wOpp', 'vOpp', 'opponentWeight'],
+];
+const DEFAULT_WEIGHTS = { formWeight: 0.25, ratingWeight: 0.40, h2hWeight: 0.15, opponentWeight: 0.60 };
 
 const METRIC_LABELS = {
   goals: 'Goles', cards: 'Tarjetas', shots_on_goal: 'Tiros al arco',
@@ -22,8 +32,42 @@ async function init() {
   }
   populateMetrics(SUPPORTED_METRICS);
   loadTeams();
+  setupWeights();
   $('calcBtn').addEventListener('click', onCalculate);
   hideStatus();
+}
+
+// --- pesos del modelo (sliders) -------------------------------------------------
+function applyWeights() {
+  WEIGHT_FIELDS.forEach(([sliderId, valId, key]) => {
+    const v = parseFloat($(sliderId).value);
+    config[key] = v;
+    $(valId).textContent = v.toFixed(2);
+  });
+  try {
+    localStorage.setItem('weights', JSON.stringify({
+      formWeight: config.formWeight, ratingWeight: config.ratingWeight,
+      h2hWeight: config.h2hWeight, opponentWeight: config.opponentWeight,
+    }));
+  } catch { /* localStorage no disponible */ }
+}
+
+function setupWeights() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('weights') || 'null');
+    if (saved) WEIGHT_FIELDS.forEach(([sliderId, , key]) => { if (saved[key] != null) $(sliderId).value = saved[key]; });
+  } catch { /* ignore */ }
+  applyWeights();
+  WEIGHT_FIELDS.forEach(([sliderId]) => $(sliderId).addEventListener('input', onWeightChange));
+  $('resetWeights').addEventListener('click', () => {
+    WEIGHT_FIELDS.forEach(([sliderId, , key]) => { $(sliderId).value = DEFAULT_WEIGHTS[key]; });
+    onWeightChange();
+  });
+}
+
+function onWeightChange() {
+  applyWeights();
+  if (state.prediction) computeAndRender(); // recalcula el matchup actual en vivo
 }
 
 function loadTeams() {
@@ -71,10 +115,17 @@ function populateMetrics(metrics) {
 function onCalculate() {
   const teamA = $('teamA').value;
   const teamB = $('teamB').value;
-  const metric = $('metric').value;
   if (!teamA || !teamB) { showStatus('Elegí los dos equipos.', true); return; }
   if (teamA === teamB) { showStatus('Elegí dos equipos distintos.', true); return; }
+  computeAndRender();
+}
 
+// Calcula y renderiza el matchup actual con los pesos vigentes (usado por Calcular y por los sliders).
+function computeAndRender() {
+  const teamA = $('teamA').value;
+  const teamB = $('teamB').value;
+  const metric = $('metric').value;
+  if (!teamA || !teamB || teamA === teamB) return;
   try {
     const profileA = getProfile(teamA);
     const profileB = getProfile(teamB);

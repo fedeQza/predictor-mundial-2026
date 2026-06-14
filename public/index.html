@@ -34,6 +34,25 @@
         <select id="metric"></select>
       </div>
 
+      <details class="settings" id="settings">
+        <summary>⚙️ Ajustes del modelo <span class="muted">(¿qué pesa más?)</span></summary>
+        <div class="settings-grid">
+          <label>Forma reciente <strong id="vForm">0.25</strong>
+            <input type="range" id="wForm" min="0" max="0.6" step="0.05" value="0.25" />
+          </label>
+          <label>Calidad (rating) <strong id="vRating">0.40</strong>
+            <input type="range" id="wRating" min="0" max="0.8" step="0.05" value="0.40" />
+          </label>
+          <label>Historial (H2H) <strong id="vH2h">0.15</strong>
+            <input type="range" id="wH2h" min="0" max="0.5" step="0.05" value="0.15" />
+          </label>
+          <label>Calidad del rival <strong id="vOpp">0.60</strong>
+            <input type="range" id="wOpp" min="0" max="1" step="0.05" value="0.60" />
+          </label>
+        </div>
+        <button type="button" id="resetWeights" class="link-btn">Restablecer valores</button>
+      </details>
+
       <button id="calcBtn">Calcular probabilidades</button>
     </section>
 
