@@ -1,10 +1,12 @@
 // Pesos del modelo (versión estática para GitHub Pages). Mismos valores que el server.
+// Pesos calibrados por backtest (npm run tune): la calidad/Elo manda y la forma reciente casi
+// no pesa (el rating ya incluye recencia). Estos son los defaults; los sliders los pueden cambiar.
 export const config = {
   homeAdvantage: 0,
-  formWeight: 0.25,
-  h2hWeight: 0.15,
-  opponentWeight: 0.6,
-  ratingWeight: 0.40,
+  formWeight: 0.05,
+  h2hWeight: 0.20,
+  opponentWeight: 1.0,
+  ratingWeight: 0.90,
   recentMatches: 10,
   leagueAverageGoals: 1.35,
   // Correccion Dixon-Coles (empates/marcadores bajos). Calibrado por backtest (npm run backtest).

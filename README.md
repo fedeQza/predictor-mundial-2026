@@ -13,7 +13,13 @@ Dixon-Coles** (para repartir mejor empates y marcadores bajos) y **ajustes heur�
 El modelo se valida contra resultados reales con `npm run backtest`: predice ~1000 partidos
 pasados entre mundialistas (perfiles *as-of* cada fecha, sin fuga de datos) y mide **log-loss**,
 **Brier** y **accuracy**. Así se eligió el parámetro de Dixon-Coles (`DC_RHO`, óptimo ≈ -0.05) con
-datos en vez de a ojo, y se confirmó que el modelo supera al azar (log-loss 1.058 < 1.099).
+datos en vez de a ojo.
+
+`npm run tune` va más allá: busca en grilla los **pesos** (forma, calidad, rival, H2H) con
+**train/test split** (entrena 2018-2024, valida 2025+) para no sobreajustar. El resultado fue
+contundente: conviene que **la calidad/Elo pese fuerte y la forma reciente casi nada** (el rating
+ya incluye recencia, así que la forma era redundante). Con los pesos calibrados la **accuracy subió
+de 45% a 49%** y el log-loss de 1.058 a 1.028.
 
 ## Calidad por equipo (4 niveles) y fuerza del rival
 

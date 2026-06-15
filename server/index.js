@@ -37,7 +37,7 @@ function parseWeights(q) {
   const map = { wForm: 'formWeight', wRating: 'ratingWeight', wH2h: 'h2hWeight', wOpp: 'opponentWeight' };
   for (const [param, key] of Object.entries(map)) {
     const v = parseFloat(q[param]);
-    if (Number.isFinite(v) && v >= 0 && v <= 1) w[key] = v;
+    if (Number.isFinite(v) && v >= 0 && v <= 2) w[key] = v;
   }
   return w;
 }

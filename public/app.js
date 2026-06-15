@@ -6,7 +6,7 @@ const state = { demoMode: false, teams: [], prediction: null, selectedMetric: 'a
 
 // Sliders de pesos del modelo: [idSlider, idValor].
 const WEIGHT_FIELDS = [['wForm', 'vForm'], ['wRating', 'vRating'], ['wH2h', 'vH2h'], ['wOpp', 'vOpp']];
-const DEFAULT_WEIGHTS = { wForm: 0.25, wRating: 0.40, wH2h: 0.15, wOpp: 0.60 };
+const DEFAULT_WEIGHTS = { wForm: 0.05, wRating: 0.90, wH2h: 0.20, wOpp: 1.00 };
 
 // --- inicializacion -------------------------------------------------------------
 

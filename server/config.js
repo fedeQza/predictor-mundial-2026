@@ -57,14 +57,16 @@ export const config = {
 
   // Parametros del modelo (ver .env.example).
   homeAdvantage: num(process.env.HOME_ADVANTAGE, 0),
-  formWeight: num(process.env.FORM_WEIGHT, 0.25),
-  h2hWeight: num(process.env.H2H_WEIGHT, 0.15),
+  // Defaults calibrados por backtest (npm run tune): la calidad/Elo pesa fuerte y la forma
+  // reciente casi nada (el rating ya incluye recencia, asi que la forma era redundante).
+  formWeight: num(process.env.FORM_WEIGHT, 0.05),
+  h2hWeight: num(process.env.H2H_WEIGHT, 0.20),
 
-  // Cuanto pondera la calidad del rival al promediar los partidos pasados (0 a 1).
-  // 0 = no importa contra quien jugo; 1 = ajuste pleno.
-  opponentWeight: num(process.env.OPPONENT_WEIGHT, 0.6),
-  // Peso directo de la diferencia de rating entre los dos equipos sobre los goles esperados (0 a 1).
-  ratingWeight: num(process.env.RATING_WEIGHT, 0.18),
+  // Cuanto pondera la calidad del rival al promediar los partidos pasados.
+  // 0 = no importa contra quien jugo; valores altos = ajuste pleno (incluso >1).
+  opponentWeight: num(process.env.OPPONENT_WEIGHT, 1.0),
+  // Peso directo de la diferencia de rating entre los dos equipos sobre los goles esperados.
+  ratingWeight: num(process.env.RATING_WEIGHT, 0.90),
   recentMatches: num(process.env.RECENT_MATCHES, 10),
   statsMatches: num(process.env.STATS_MATCHES, 3),
 

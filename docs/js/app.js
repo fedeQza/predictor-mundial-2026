@@ -14,7 +14,7 @@ const WEIGHT_FIELDS = [
   ['wH2h', 'vH2h', 'h2hWeight'],
   ['wOpp', 'vOpp', 'opponentWeight'],
 ];
-const DEFAULT_WEIGHTS = { formWeight: 0.25, ratingWeight: 0.40, h2hWeight: 0.15, opponentWeight: 0.60 };
+const DEFAULT_WEIGHTS = { formWeight: 0.05, ratingWeight: 0.90, h2hWeight: 0.20, opponentWeight: 1.00 };
 
 const METRIC_LABELS = {
   goals: 'Goles', cards: 'Tarjetas', shots_on_goal: 'Tiros al arco',
