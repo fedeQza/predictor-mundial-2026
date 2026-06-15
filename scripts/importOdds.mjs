@@ -30,6 +30,7 @@ const ODDS_VARIANTS = {
   'USA': 'United States',
   'DR Congo': 'DR Congo',
   'Czechia': 'Czech Republic',
+  'Bosnia & Herzegovina': 'Bosnia and Herzegovina',
 };
 function nameToId(name) {
   if (!name) return null;
