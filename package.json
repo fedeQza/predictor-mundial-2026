@@ -10,6 +10,7 @@
     "dev": "node --env-file=.env --watch server/index.js",
     "import:intl": "node scripts/importIntlResults.mjs",
     "compute:ratings": "node scripts/computeRatings.mjs",
+    "backtest": "node scripts/backtest.mjs",
     "build:dataset": "node --env-file=.env scripts/buildDataset.mjs"
   },
   "dependencies": {

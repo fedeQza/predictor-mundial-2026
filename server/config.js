@@ -78,4 +78,8 @@ export const config = {
   // Promedio global de goles por equipo y por partido (baseline tipico del futbol).
   // Se usa como ancla para no sobre-reaccionar a muestras chicas.
   leagueAverageGoals: 1.35,
+
+  // Correccion Dixon-Coles para marcadores bajos (rho). El Poisson independiente subestima
+  // empates 0-0/1-1; rho<0 lo corrige. Valor calibrado por backtest (npm run backtest). 0 = off.
+  dcRho: num(process.env.DC_RHO, -0.05),
 };

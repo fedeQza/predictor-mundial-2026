@@ -7,6 +7,8 @@ export const config = {
   ratingWeight: 0.40,
   recentMatches: 10,
   leagueAverageGoals: 1.35,
+  // Correccion Dixon-Coles (empates/marcadores bajos). Calibrado por backtest (npm run backtest).
+  dcRho: -0.05,
 };
 
 // Escala de ratings 0-1000 (los ratings vienen de data/ratings.json en esa escala).

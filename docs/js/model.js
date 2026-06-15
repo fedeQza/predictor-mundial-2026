@@ -47,14 +47,27 @@ function computeGoalLambdas(teamA, teamB, h2h) {
   return { lambdaA, lambdaB };
 }
 
+// Factor de correlacion Dixon-Coles (corrige empates/marcadores bajos). rho<0 sube 0-0 y 1-1.
+function dcTau(a, b, lambdaA, lambdaB, rho) {
+  if (!rho) return 1;
+  let t = 1;
+  if (a === 0 && b === 0) t = 1 - lambdaA * lambdaB * rho;
+  else if (a === 0 && b === 1) t = 1 + lambdaA * rho;
+  else if (a === 1 && b === 0) t = 1 + lambdaB * rho;
+  else if (a === 1 && b === 1) t = 1 - rho;
+  return Math.max(0, t);
+}
+
 function summarizeGoals(teamA, teamB, h2h) {
   const { lambdaA, lambdaB } = computeGoalLambdas(teamA, teamB, h2h);
-  let pWinA = 0, pDraw = 0, pWinB = 0, pBtts = 0;
+  const rho = config.dcRho ?? 0;
+  let pWinA = 0, pDraw = 0, pWinB = 0, pBtts = 0, Z = 0;
   const overUnder = { 1.5: 0, 2.5: 0, 3.5: 0 };
   const scorelines = [];
   for (let a = 0; a <= MAX_GOALS; a++) {
     for (let b = 0; b <= MAX_GOALS; b++) {
-      const p = poissonPmf(a, lambdaA) * poissonPmf(b, lambdaB);
+      const p = poissonPmf(a, lambdaA) * poissonPmf(b, lambdaB) * dcTau(a, b, lambdaA, lambdaB, rho);
+      Z += p;
       if (a > b) pWinA += p; else if (a < b) pWinB += p; else pDraw += p;
       if (a > 0 && b > 0) pBtts += p;
       const total = a + b;
@@ -64,8 +77,11 @@ function summarizeGoals(teamA, teamB, h2h) {
       scorelines.push({ a, b, p });
     }
   }
+  const norm = Z > 0 ? 1 / Z : 1;
+  pWinA *= norm; pDraw *= norm; pWinB *= norm; pBtts *= norm;
+  overUnder[1.5] *= norm; overUnder[2.5] *= norm; overUnder[3.5] *= norm;
   scorelines.sort((x, y) => y.p - x.p);
-  const topScores = scorelines.slice(0, 5).map((s) => ({ score: `${s.a}-${s.b}`, prob: pct(s.p) }));
+  const topScores = scorelines.slice(0, 5).map((s) => ({ score: `${s.a}-${s.b}`, prob: pct(s.p * norm) }));
   return {
     lambdaA: round(lambdaA, 2), lambdaB: round(lambdaB, 2),
     outcome: { winA: pct(pWinA), draw: pct(pDraw), winB: pct(pWinB) },

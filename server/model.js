@@ -95,29 +95,32 @@ function computeGoalLambdas(teamA, teamB, h2h, w = {}) {
   return { lambdaA, lambdaB };
 }
 
-function buildScoreMatrix(lambdaA, lambdaB) {
-  const matrix = [];
-  for (let a = 0; a <= MAX_GOALS; a++) {
-    matrix[a] = [];
-    for (let b = 0; b <= MAX_GOALS; b++) {
-      matrix[a][b] = poissonPmf(a, lambdaA) * poissonPmf(b, lambdaB);
-    }
-  }
-  return matrix;
+// Factor de correlacion Dixon-Coles para las 4 celdas de marcador bajo. rho<0 sube 0-0 y 1-1
+// (empates) y baja 1-0 / 0-1, corrigiendo la subestimacion de empates del Poisson independiente.
+function dcTau(a, b, lambdaA, lambdaB, rho) {
+  if (!rho) return 1;
+  let t = 1;
+  if (a === 0 && b === 0) t = 1 - lambdaA * lambdaB * rho;
+  else if (a === 0 && b === 1) t = 1 + lambdaA * rho;
+  else if (a === 1 && b === 0) t = 1 + lambdaB * rho;
+  else if (a === 1 && b === 1) t = 1 - rho;
+  return Math.max(0, t);
 }
 
-function summarizeGoals(teamA, teamB, h2h, w) {
+function summarizeGoals(teamA, teamB, h2h, w = {}) {
   const { lambdaA, lambdaB } = computeGoalLambdas(teamA, teamB, h2h, w);
-  const matrix = buildScoreMatrix(lambdaA, lambdaB);
+  const rho = w.dcRho ?? config.dcRho ?? 0;
 
   let pWinA = 0, pDraw = 0, pWinB = 0;
   let pBtts = 0;
+  let Z = 0; // suma total tras aplicar Dixon-Coles (para renormalizar)
   const overUnder = { 1.5: 0, 2.5: 0, 3.5: 0 };
   const scorelines = [];
 
   for (let a = 0; a <= MAX_GOALS; a++) {
     for (let b = 0; b <= MAX_GOALS; b++) {
-      const p = matrix[a][b];
+      const p = poissonPmf(a, lambdaA) * poissonPmf(b, lambdaB) * dcTau(a, b, lambdaA, lambdaB, rho);
+      Z += p;
       if (a > b) pWinA += p;
       else if (a < b) pWinB += p;
       else pDraw += p;
@@ -133,10 +136,15 @@ function summarizeGoals(teamA, teamB, h2h, w) {
     }
   }
 
+  // Renormalizar: Dixon-Coles altera la masa de las 4 celdas, asi que dividimos por Z.
+  const norm = Z > 0 ? 1 / Z : 1;
+  pWinA *= norm; pDraw *= norm; pWinB *= norm; pBtts *= norm;
+  overUnder[1.5] *= norm; overUnder[2.5] *= norm; overUnder[3.5] *= norm;
+
   scorelines.sort((x, y) => y.p - x.p);
   const topScores = scorelines.slice(0, 5).map((s) => ({
     score: `${s.a}-${s.b}`,
-    prob: pct(s.p),
+    prob: pct(s.p * norm),
   }));
 
   return {

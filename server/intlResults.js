@@ -76,14 +76,17 @@ function ratingByRepoName(name) {
 const isPlayed = (r) => r.home_score !== 'NA' && r.away_score !== 'NA' && r.home_score !== '' && r.away_score !== '';
 
 // --- perfil --------------------------------------------------------------------
-export function getIntlProfile(id, opponentWeight = config.opponentWeight) {
+export function getIntlProfile(id, opponentWeight = config.opponentWeight, asOf = null) {
   loadIntl();
   const teamId = Number(id);
   const team = WORLD_CUP_TEAMS.find((t) => t.id === teamId);
   const mine = rows.filter((r) => repoNameToId(r.home) === teamId || repoNameToId(r.away) === teamId);
   if (mine.length === 0) return null;
 
-  const played = mine.filter(isPlayed).sort((a, b) => (a.date < b.date ? 1 : -1));
+  // asOf (para backtest): solo partidos ANTERIORES a esa fecha, sin fuga de datos.
+  const played = mine
+    .filter((r) => isPlayed(r) && (!asOf || r.date < asOf))
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
   const recentRows = played.slice(0, config.recentMatches);
 
   const recent = [];
@@ -140,13 +143,13 @@ export function getIntlProfile(id, opponentWeight = config.opponentWeight) {
 }
 
 // --- head-to-head ---------------------------------------------------------------
-export function getIntlH2H(profileA, profileB) {
+export function getIntlH2H(profileA, profileB, asOf = null) {
   loadIntl();
   const idA = Number(profileA.id);
   const idB = Number(profileB.id);
 
   const h2h = rows.filter((r) => {
-    if (!isPlayed(r)) return false;
+    if (!isPlayed(r) || (asOf && r.date >= asOf)) return false;
     const h = repoNameToId(r.home); const a = repoNameToId(r.away);
     return (h === idA && a === idB) || (h === idB && a === idA);
   }).sort((x, y) => (x.date < y.date ? 1 : -1));

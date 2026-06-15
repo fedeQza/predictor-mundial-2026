@@ -4,8 +4,16 @@ App web para estimar las **probabilidades de resultado** entre dos selecciones d
 analizando su forma reciente, el historial entre ellas (head-to-head) y sus últimos partidos.
 Además podés **elegir qué dato ver**: goles, tarjetas, tiros al arco, tiros totales, córners y faltas.
 
-El modelo combina **Poisson** (fuerza de ataque/defensa de cada equipo) con **ajustes heurísticos**
+El modelo combina **Poisson** (fuerza de ataque/defensa de cada equipo) con la **corrección
+Dixon-Coles** (para repartir mejor empates y marcadores bajos) y **ajustes heurísticos**
 (forma reciente, enfrentamientos directos y **calidad de los rivales**).
+
+### Validación (backtest)
+
+El modelo se valida contra resultados reales con `npm run backtest`: predice ~1000 partidos
+pasados entre mundialistas (perfiles *as-of* cada fecha, sin fuga de datos) y mide **log-loss**,
+**Brier** y **accuracy**. Así se eligió el parámetro de Dixon-Coles (`DC_RHO`, óptimo ≈ -0.05) con
+datos en vez de a ojo, y se confirmó que el modelo supera al azar (log-loss 1.058 < 1.099).
 
 ## Calidad por equipo (4 niveles) y fuerza del rival
 
