@@ -2,7 +2,7 @@
 
 const $ = (id) => document.getElementById(id);
 
-const state = { demoMode: false, teams: [], prediction: null, selectedMetric: 'all', enriched: false };
+const state = { demoMode: false, teams: [], prediction: null, selectedMetric: 'all', enriched: false, modelMode: 'avanzado' };
 
 // Sliders de pesos del modelo: [idSlider, idValor].
 const WEIGHT_FIELDS = [['wForm', 'vForm'], ['wRating', 'vRating'], ['wH2h', 'vH2h'], ['wOpp', 'vOpp']];
@@ -21,9 +21,33 @@ async function init() {
   }
 
   await loadTeams();
+  setupModelMode();
   setupWeights();
   $('calcBtn').addEventListener('click', onCalculate);
   $('enrichBtn').addEventListener('click', onEnrich);
+}
+
+// --- modo del modelo (avanzado=ataque/defensa | clasico=heuristico con sliders) -------------
+function setupModelMode() {
+  const saved = (() => { try { return localStorage.getItem('modelMode'); } catch { return null; } })();
+  state.modelMode = saved === 'clasico' ? 'clasico' : 'avanzado';
+  applyModelMode();
+  document.querySelectorAll('input[name="modelMode"]').forEach((r) => {
+    r.checked = r.value === state.modelMode;
+    r.addEventListener('change', () => {
+      if (!r.checked) return;
+      state.modelMode = r.value;
+      try { localStorage.setItem('modelMode', r.value); } catch { /* ignore */ }
+      applyModelMode();
+      state.enriched = false;
+      if (state.prediction) onCalculate();
+    });
+  });
+}
+function applyModelMode() {
+  const classic = state.modelMode === 'clasico';
+  const cc = $('classicControls'); if (cc) cc.hidden = !classic;
+  const hint = $('modeHint'); if (hint) hint.hidden = classic;
 }
 
 // --- pesos del modelo (sliders) -------------------------------------------------
@@ -31,7 +55,7 @@ function updateWeightLabels() {
   WEIGHT_FIELDS.forEach(([s, v]) => { $(v).textContent = parseFloat($(s).value).toFixed(2); });
 }
 function weightsQuery() {
-  return `&wForm=${$('wForm').value}&wRating=${$('wRating').value}&wH2h=${$('wH2h').value}&wOpp=${$('wOpp').value}`;
+  return `&model=${state.modelMode}&wForm=${$('wForm').value}&wRating=${$('wRating').value}&wH2h=${$('wH2h').value}&wOpp=${$('wOpp').value}`;
 }
 function setupWeights() {
   try {

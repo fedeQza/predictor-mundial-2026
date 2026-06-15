@@ -39,6 +39,10 @@ function parseWeights(q) {
     const v = parseFloat(q[param]);
     if (Number.isFinite(v) && v >= 0 && v <= 2) w[key] = v;
   }
+  // Modo del modelo: 'clasico' fuerza el heuristico (con pesos); 'avanzado'/ausente usa el default
+  // (ataque/defensa DC). Si el front no manda nada, gana config.useDcModel.
+  if (q.model === 'clasico') w.useDcModel = false;
+  else if (q.model === 'avanzado') w.useDcModel = true;
   return w;
 }
 

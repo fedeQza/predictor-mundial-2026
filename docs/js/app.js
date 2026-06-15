@@ -32,9 +32,33 @@ async function init() {
   }
   populateMetrics(SUPPORTED_METRICS);
   loadTeams();
+  setupModelMode();
   setupWeights();
   $('calcBtn').addEventListener('click', onCalculate);
   hideStatus();
+}
+
+// --- modo del modelo (avanzado=ataque/defensa | clasico=heuristico con sliders) -------------
+function setupModelMode() {
+  const saved = (() => { try { return localStorage.getItem('modelMode'); } catch { return null; } })();
+  const mode = saved === 'clasico' ? 'clasico' : 'avanzado';
+  applyModelMode(mode);
+  document.querySelectorAll('input[name="modelMode"]').forEach((r) => {
+    r.checked = r.value === mode;
+    r.addEventListener('change', () => {
+      if (!r.checked) return;
+      applyModelMode(r.value);
+      try { localStorage.setItem('modelMode', r.value); } catch { /* ignore */ }
+      if (state.prediction) computeAndRender();
+    });
+  });
+}
+
+function applyModelMode(mode) {
+  const classic = mode === 'clasico';
+  config.useDcModel = !classic;
+  $('classicControls').hidden = !classic;
+  $('modeHint').hidden = classic;
 }
 
 // --- pesos del modelo (sliders) -------------------------------------------------

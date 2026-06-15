@@ -32,22 +32,32 @@
       </div>
 
       <details class="settings" id="settings">
-        <summary>⚙️ Ajustes del modelo <span class="muted">(¿qué pesa más?)</span></summary>
-        <div class="settings-grid">
-          <label>Forma reciente <strong id="vForm">0.05</strong>
-            <input type="range" id="wForm" min="0" max="0.6" step="0.05" value="0.05" />
-          </label>
-          <label>Calidad (rating) <strong id="vRating">0.90</strong>
-            <input type="range" id="wRating" min="0" max="1.2" step="0.05" value="0.90" />
-          </label>
-          <label>Historial (H2H) <strong id="vH2h">0.20</strong>
-            <input type="range" id="wH2h" min="0" max="0.5" step="0.05" value="0.20" />
-          </label>
-          <label>Calidad del rival <strong id="vOpp">1.00</strong>
-            <input type="range" id="wOpp" min="0" max="1.2" step="0.05" value="1.00" />
-          </label>
+        <summary>⚙️ Ajustes del modelo</summary>
+        <div class="model-mode">
+          <label><input type="radio" name="modelMode" value="avanzado" checked />
+            <span><strong>Avanzado</strong> · ataque/defensa ajustado (recomendado)</span></label>
+          <label><input type="radio" name="modelMode" value="clasico" />
+            <span><strong>Clásico</strong> · pesos ajustables a mano</span></label>
         </div>
-        <button type="button" id="resetWeights" class="link-btn">Restablecer valores</button>
+        <p class="muted mode-hint" id="modeHint">El modelo avanzado calcula la fuerza de ataque y
+          defensa de cada selección a partir de su historial. Es más preciso, por eso no usa pesos.</p>
+        <div id="classicControls" hidden>
+          <div class="settings-grid">
+            <label>Forma reciente <strong id="vForm">0.05</strong>
+              <input type="range" id="wForm" min="0" max="0.6" step="0.05" value="0.05" />
+            </label>
+            <label>Calidad (rating) <strong id="vRating">0.90</strong>
+              <input type="range" id="wRating" min="0" max="1.2" step="0.05" value="0.90" />
+            </label>
+            <label>Historial (H2H) <strong id="vH2h">0.20</strong>
+              <input type="range" id="wH2h" min="0" max="0.5" step="0.05" value="0.20" />
+            </label>
+            <label>Calidad del rival <strong id="vOpp">1.00</strong>
+              <input type="range" id="wOpp" min="0" max="1.2" step="0.05" value="1.00" />
+            </label>
+          </div>
+          <button type="button" id="resetWeights" class="link-btn">Restablecer valores</button>
+        </div>
       </details>
 
       <button id="calcBtn">Calcular probabilidades</button>
