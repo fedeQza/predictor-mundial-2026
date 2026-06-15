@@ -13,6 +13,7 @@
     "backtest": "node scripts/backtest.mjs",
     "tune": "node scripts/tuneWeights.mjs",
     "tune:elo": "node --env-file=.env scripts/tuneElo.mjs",
+    "fit:dc": "node scripts/fitDcModel.mjs",
     "build:dataset": "node --env-file=.env scripts/buildDataset.mjs"
   },
   "dependencies": {

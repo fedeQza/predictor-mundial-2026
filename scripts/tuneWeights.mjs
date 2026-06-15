@@ -47,7 +47,8 @@ function buildSamples(ow) {
 function logloss(samples, w) {
   let ll = 0;
   for (const s of samples) {
-    const o = predict(s.pa, s.pb, s.h, 'goals', w).goals.outcome;
+    // useDcModel:false -> este tuner calibra el modelo HEURISTICO (fallback); el DC tiene su gate (npm run fit:dc).
+    const o = predict(s.pa, s.pb, s.h, 'goals', { useDcModel: false, ...w }).goals.outcome;
     let p = [o.winA / 100, o.draw / 100, o.winB / 100];
     const sum = p[0] + p[1] + p[2];
     if (sum > 0) p = p.map((x) => x / sum);

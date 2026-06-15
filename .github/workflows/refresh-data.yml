@@ -24,19 +24,20 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Importar resultados y recalcular ratings (Elo)
+      - name: Importar resultados, recalcular ratings (Elo) y ajustar modelo ataque/defensa (DC)
         run: |
           node scripts/importIntlResults.mjs
           node scripts/computeRatings.mjs
+          node scripts/fitDcModel.mjs --write
 
       - name: Copiar al sitio estático (docs/)
-        run: cp data/international_results.csv data/ratings.json docs/data/
+        run: cp data/international_results.csv data/ratings.json data/dcParams.json docs/data/
 
       - name: Commit y push si hubo cambios
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/international_results.csv data/ratings.json docs/data/
+          git add data/international_results.csv data/ratings.json data/dcParams.json docs/data/
           if git diff --staged --quiet; then
             echo "Sin cambios en los datos; no se commitea."
           else

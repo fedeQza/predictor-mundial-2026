@@ -55,6 +55,13 @@ export const config = {
   // queda solo para las stats detalladas via el boton "Consultar API". USE_INTL=0 lo apaga.
   useIntl: (process.env.USE_INTL ?? '1').trim() !== '0',
 
+  // --- Modelo Dixon-Coles de ataque/defensa (MLE) -------------------------------
+  // ON por defecto: si data/dcParams.json existe (npm run fit:dc -- --write), los goles esperados
+  // (lambdas) salen de las fuerzas ataque/defensa ajustadas por maxima verosimilitud, en vez de la
+  // receta heuristica (promedios + multiplicadores). Validado por backtest: baja el log-loss de
+  // 1.053 a 0.996 y sube la accuracy de 48% a 54% (npm run fit:dc). USE_DC_MODEL=0 vuelve al heuristico.
+  useDcModel: (process.env.USE_DC_MODEL ?? '1').trim() !== '0',
+
   // Parametros del modelo (ver .env.example).
   homeAdvantage: num(process.env.HOME_ADVANTAGE, 0),
   // Defaults calibrados por backtest (npm run tune): la calidad/Elo pesa fuerte y la forma

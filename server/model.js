@@ -2,6 +2,7 @@
 // (forma reciente y head-to-head). Todo el calculo es puro (sin I/O).
 
 import { config } from './config.js';
+import { dcLambdasForIds, hasData as hasDcData } from './dcRatings.js';
 
 const MAX_GOALS = 8; // tope de goles por equipo para la matriz Poisson
 
@@ -57,6 +58,19 @@ function h2hMultiplier(avgGoalsInH2H, sampleCount, h2hWeight) {
 // --- prediccion de goles (resultado del partido) --------------------------------
 
 function computeGoalLambdas(teamA, teamB, h2h, w = {}) {
+  // Modelo Dixon-Coles (ataque/defensa por MLE): si esta disponible, los goles esperados salen de
+  // las fuerzas de equipo ajustadas, sin la pila heuristica (forma/H2H/ratio de Elo). Validado por
+  // backtest: baja el log-loss y reparte mejor favoritos/empates. La correccion DC (rho) y la
+  // temperatura se aplican igual despues, en summarizeGoals.
+  if ((w.useDcModel ?? config.useDcModel) && hasDcData()) {
+    const dc = dcLambdasForIds(teamA.id, teamB.id);
+    if (dc) {
+      const lambdaA = Math.max(0.2, Math.min(5, dc.lambdaA));
+      const lambdaB = Math.max(0.2, Math.min(5, dc.lambdaB));
+      return { lambdaA, lambdaB };
+    }
+  }
+
   const formWeight = w.formWeight ?? config.formWeight;
   const h2hWeight = w.h2hWeight ?? config.h2hWeight;
   const ratingWeight = w.ratingWeight ?? config.ratingWeight;

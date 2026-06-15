@@ -4,28 +4,30 @@ App web para estimar las **probabilidades de resultado** entre dos selecciones d
 analizando su forma reciente, el historial entre ellas (head-to-head) y sus últimos partidos.
 Además podés **elegir qué dato ver**: goles, tarjetas, tiros al arco, tiros totales, córners y faltas.
 
-El modelo combina **Poisson** (fuerza de ataque/defensa de cada equipo) con la **corrección
-Dixon-Coles** (para repartir mejor empates y marcadores bajos) y **ajustes heurísticos**
-(forma reciente, enfrentamientos directos y **calidad de los rivales**).
+El modelo principal es un **Dixon-Coles completo**: estima por **máxima verosimilitud (MLE)** una
+**fuerza de ataque y una de defensa por selección**, consistentes entre sí, sobre todo el historial
+2010+ con decaimiento temporal y regularización. De ahí salen los goles esperados (λ) de cada cruce;
+encima se aplican la **corrección Dixon-Coles** de marcadores bajos (`DC_RHO`) y la temperatura de
+calibración. Se ajusta con `npm run fit:dc -- --write` (escribe `data/dcParams.json`) y se puede
+apagar con `USE_DC_MODEL=0` (vuelve al modelo heurístico de promedios + pesos).
 
 ### Validación (backtest)
 
-El modelo se valida contra resultados reales con `npm run backtest`: predice ~1000 partidos
-pasados entre mundialistas (perfiles *as-of* cada fecha, sin fuga de datos) y mide **log-loss**,
-**Brier** y **accuracy**. Así se eligió el parámetro de Dixon-Coles (`DC_RHO`, óptimo ≈ -0.05) con
-datos en vez de a ojo.
+Todo se valida contra resultados reales (perfiles/ajustes *as-of*, sin fuga de datos) midiendo
+**log-loss**, **Brier** y **accuracy** con **train/test split** (entrena hasta 2024, valida 2025+).
 
-`npm run tune` va más allá: busca en grilla los **pesos** (forma, calidad, rival, H2H) con
-**train/test split** (entrena 2018-2024, valida 2025+) para no sobreajustar. El resultado fue
-contundente: conviene que **la calidad/Elo pese fuerte y la forma reciente casi nada** (el rating
-ya incluye recencia, así que la forma era redundante). Con los pesos calibrados la **accuracy subió
-de 45% a 49%** y el log-loss de 1.058 a 1.028.
+- `npm run fit:dc` ajusta el modelo ataque/defensa, busca en grilla sus hiperparámetros
+  (decaimiento `xiYears`, shrinkage `l2`, `rho`) y lo **compara contra el heurístico** en test. Pasar
+  del heurístico al modelo MLE fue el salto grande: **log-loss 1.053 → 0.996** y **accuracy 48% → 54%**
+  (el blend eligió DC puro: el heurístico no aporta nada encima). Resuelve además el problema de
+  probabilidades "tibias" (p.ej. Alemania–Curazao pasa a ~91/6/2 en vez de un favorito desdibujado).
+- `npm run backtest` mide el modelo en vivo y eligió `DC_RHO` (≈ -0.05) con datos en vez de a ojo.
+- `npm run tune` y `npm run tune:elo` calibran el **modelo heurístico** (pesos forma/calidad/rival/H2H)
+  y el Elo. Quedan como herramientas del fallback: con `tune` la accuracy del heurístico subió de 45%
+  a 49%, pero el modelo MLE lo supera por estructura, no por tuneo.
 
-`npm run tune:elo` calibra los hiperparámetros del propio Elo (K, recencia, mezcla con prior) y la
-temperatura de probabilidades. Conclusión: tras la calibración de pesos, el modelo ya está **cerca
-de su techo** para datos de solo-resultados — afinar más el Elo o la temperatura aporta cambios al
-nivel del ruido. Para mejorar de verdad harían falta señales nuevas (xG, alineaciones, lesiones),
-que no están en el dataset offline.
+Para mejorar más allá de esto harían falta **señales nuevas** (xG, alineaciones, lesiones), que no
+están en el dataset offline de solo-resultados.
 
 ## Calidad por equipo (4 niveles) y fuerza del rival
 

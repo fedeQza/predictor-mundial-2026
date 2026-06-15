@@ -2,6 +2,7 @@
 // Portado de server/model.js sin cambios de lógica.
 
 import { config } from './config.js';
+import { dcLambdasForIds, hasDcData } from './dcModel.js';
 
 const MAX_GOALS = 8;
 
@@ -27,6 +28,17 @@ function h2hMultiplier(avgGoalsInH2H, sampleCount) {
 }
 
 function computeGoalLambdas(teamA, teamB, h2h) {
+  // Modelo Dixon-Coles (ataque/defensa por MLE): si está disponible, los goles esperados salen de
+  // las fuerzas de equipo ajustadas, sin la pila heurística. Espejo de server/model.js.
+  if (config.useDcModel && hasDcData()) {
+    const dc = dcLambdasForIds(teamA.id, teamB.id);
+    if (dc) {
+      const lambdaA = Math.max(0.2, Math.min(5, dc.lambdaA));
+      const lambdaB = Math.max(0.2, Math.min(5, dc.lambdaB));
+      return { lambdaA, lambdaB };
+    }
+  }
+
   let lambdaA = (teamA.avgGoalsFor + teamB.avgGoalsAgainst) / 2;
   let lambdaB = (teamB.avgGoalsFor + teamA.avgGoalsAgainst) / 2;
   lambdaA = 0.8 * lambdaA + 0.2 * config.leagueAverageGoals;

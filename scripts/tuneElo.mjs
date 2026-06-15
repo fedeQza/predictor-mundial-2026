@@ -55,7 +55,7 @@ function buildSamples() {
 function logloss(samples, extra = {}) {
   let ll = 0;
   for (const s of samples) {
-    const o = predict(s.pa, s.pb, s.h, 'goals', { ...W, ...extra }).goals.outcome;
+    const o = predict(s.pa, s.pb, s.h, 'goals', { useDcModel: false, ...W, ...extra }).goals.outcome;
     let p = [o.winA / 100, o.draw / 100, o.winB / 100];
     const sum = p[0] + p[1] + p[2];
     if (sum > 0) p = p.map((x) => x / sum);
