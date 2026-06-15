@@ -29,6 +29,23 @@ Todo se valida contra resultados reales (perfiles/ajustes *as-of*, sin fuga de d
 Para mejorar más allá de esto harían falta **señales nuevas** (xG, alineaciones, lesiones), que no
 están en el dataset offline de solo-resultados.
 
+### Cuotas del mercado (blend offline)
+
+Las cuotas de las casas son el predictor mejor calibrado que existe, así que el modelo puede
+**mezclar su 1X2 con el mercado**. Funciona en modo **snapshot offline**: la web nunca consume la
+API; solo se baja un snapshot a mano y se lee desde `data/odds.json`.
+
+```bash
+# requiere ODDS_API_KEY en .env (key gratis ~500 req/mes en https://the-odds-api.com)
+npm run import:odds      # baja cuotas 1X2 del Mundial -> data/odds.json (+ docs/data)
+```
+
+El blend (`ODDS_WEIGHT`, default 0.6 = 60% mercado) solo afecta el resultado (no marcadores) y solo
+en cruces que son un **partido real programado** (un matchup hipotético queda en modelo puro). Se
+corre cuando hace falta: ahora la fase de grupos; cuando se definan los cruces, se baja de nuevo.
+`USE_ODDS=0` lo apaga. Cada import cuesta 1 crédito; con el cron cada 6 h serían ~120/mes, muy por
+debajo del límite gratuito (pero por diseño el import es **manual**, no automático).
+
 ## Calidad por equipo (4 niveles) y fuerza del rival
 
 Cada selección tiene un **rating** y un **nivel/grupo**: **Elite · Alta · Media · Baja**
