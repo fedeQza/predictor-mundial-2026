@@ -21,6 +21,12 @@ contundente: conviene que **la calidad/Elo pese fuerte y la forma reciente casi 
 ya incluye recencia, así que la forma era redundante). Con los pesos calibrados la **accuracy subió
 de 45% a 49%** y el log-loss de 1.058 a 1.028.
 
+`npm run tune:elo` calibra los hiperparámetros del propio Elo (K, recencia, mezcla con prior) y la
+temperatura de probabilidades. Conclusión: tras la calibración de pesos, el modelo ya está **cerca
+de su techo** para datos de solo-resultados — afinar más el Elo o la temperatura aporta cambios al
+nivel del ruido. Para mejorar de verdad harían falta señales nuevas (xG, alineaciones, lesiones),
+que no están en el dataset offline.
+
 ## Calidad por equipo (4 niveles) y fuerza del rival
 
 Cada selección tiene un **rating** y un **nivel/grupo**: **Elite · Alta · Media · Baja**

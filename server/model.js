@@ -141,6 +141,14 @@ function summarizeGoals(teamA, teamB, h2h, w = {}) {
   pWinA *= norm; pDraw *= norm; pWinB *= norm; pBtts *= norm;
   overUnder[1.5] *= norm; overUnder[2.5] *= norm; overUnder[3.5] *= norm;
 
+  // Calibracion por temperatura del 3-way W/D/L (no toca BTTS/over-under/marcadores).
+  const T = w.probTemp ?? config.probTemp ?? 1;
+  if (T !== 1 && T > 0) {
+    const qa = pWinA ** (1 / T), qd = pDraw ** (1 / T), qb = pWinB ** (1 / T);
+    const qs = qa + qd + qb;
+    if (qs > 0) { pWinA = qa / qs; pDraw = qd / qs; pWinB = qb / qs; }
+  }
+
   scorelines.sort((x, y) => y.p - x.p);
   const topScores = scorelines.slice(0, 5).map((s) => ({
     score: `${s.a}-${s.b}`,

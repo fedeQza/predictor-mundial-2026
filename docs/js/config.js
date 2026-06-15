@@ -11,6 +11,8 @@ export const config = {
   leagueAverageGoals: 1.35,
   // Correccion Dixon-Coles (empates/marcadores bajos). Calibrado por backtest (npm run backtest).
   dcRho: -0.05,
+  // Temperatura de calibracion W/D/L (>1 suaviza, <1 agudiza). Calibrada por backtest.
+  probTemp: 1.0,
 };
 
 // Escala de ratings 0-1000 (los ratings vienen de data/ratings.json en esa escala).

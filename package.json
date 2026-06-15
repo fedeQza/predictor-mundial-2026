@@ -12,6 +12,7 @@
     "compute:ratings": "node scripts/computeRatings.mjs",
     "backtest": "node scripts/backtest.mjs",
     "tune": "node scripts/tuneWeights.mjs",
+    "tune:elo": "node --env-file=.env scripts/tuneElo.mjs",
     "build:dataset": "node --env-file=.env scripts/buildDataset.mjs"
   },
   "dependencies": {

@@ -84,4 +84,8 @@ export const config = {
   // Correccion Dixon-Coles para marcadores bajos (rho). El Poisson independiente subestima
   // empates 0-0/1-1; rho<0 lo corrige. Valor calibrado por backtest (npm run backtest). 0 = off.
   dcRho: num(process.env.DC_RHO, -0.05),
+
+  // Temperatura de calibracion de las probabilidades W/D/L. >1 suaviza (menos confianza),
+  // <1 agudiza. Calibrada por backtest (npm run tune:temp). 1 = sin cambio.
+  probTemp: num(process.env.PROB_TEMP, 1.0),
 };

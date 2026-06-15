@@ -32,6 +32,14 @@ export function hasData() {
   return Object.keys(byId).length > 0;
 }
 
+// Inyecta ratings en memoria (lo usa tuneElo.mjs para probar distintos hiperparámetros sin
+// escribir el archivo). Sobrescribe lo cargado del JSON.
+export function setRatings(newById, newByName) {
+  loaded = true;
+  byId = newById || {};
+  byName = newByName || {};
+}
+
 // Rating por id (las 48). null si no está.
 export function ratingForId(id) {
   load();
