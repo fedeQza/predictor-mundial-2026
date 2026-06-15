@@ -201,6 +201,7 @@ function render(p, selectedMetric) {
 
   // Resultado
   $('matchTitle').textContent = `${nameA} vs ${nameB}`;
+  renderMarketNote(p.goals.market);
   renderQuality(p.teams.a, p.teams.b);
   $('labelA').textContent = `Gana ${nameA}`;
   $('labelB').textContent = `Gana ${nameB}`;
@@ -240,6 +241,17 @@ function render(p, selectedMetric) {
 function setBar(barId, valId, pctVal) {
   $(barId).style.width = pctVal + '%';
   $(valId).textContent = pctVal + '%';
+}
+
+function renderMarketNote(market) {
+  const el = $('marketNote');
+  if (!el) return;
+  if (market) {
+    el.textContent = `📊 Ajustado con cuotas del mercado (${Math.round(market.weight * 100)}% mercado · ${market.nBooks} casas)`;
+    el.classList.remove('hidden');
+  } else {
+    el.classList.add('hidden');
+  }
 }
 
 function qualityBadge(team) {

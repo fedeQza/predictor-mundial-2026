@@ -14,6 +14,7 @@
     "tune": "node scripts/tuneWeights.mjs",
     "tune:elo": "node --env-file=.env scripts/tuneElo.mjs",
     "fit:dc": "node scripts/fitDcModel.mjs",
+    "import:odds": "node --env-file=.env scripts/importOdds.mjs",
     "build:dataset": "node --env-file=.env scripts/buildDataset.mjs"
   },
   "dependencies": {

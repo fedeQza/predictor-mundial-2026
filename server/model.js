@@ -3,6 +3,7 @@
 
 import { config } from './config.js';
 import { dcLambdasForIds, hasData as hasDcData } from './dcRatings.js';
+import { marketProbsForIds, hasData as hasOddsData } from './odds.js';
 
 const MAX_GOALS = 8; // tope de goles por equipo para la matriz Poisson
 
@@ -163,6 +164,22 @@ function summarizeGoals(teamA, teamB, h2h, w = {}) {
     if (qs > 0) { pWinA = qa / qs; pDraw = qd / qs; pWinB = qb / qs; }
   }
 
+  // Blend con cuotas del mercado (1X2), si hay snapshot para este cruce. Las cuotas son el predictor
+  // mejor calibrado; mezclamos SOLO el resultado (no toca marcadores/BTTS/over-under). Offline.
+  let market = null;
+  if ((w.useOdds ?? config.useOdds) && hasOddsData()) {
+    const m = marketProbsForIds(teamA.id, teamB.id);
+    if (m) {
+      const k = Math.max(0, Math.min(1, w.oddsWeight ?? config.oddsWeight ?? 0));
+      pWinA = (1 - k) * pWinA + k * m.winA;
+      pDraw = (1 - k) * pDraw + k * m.draw;
+      pWinB = (1 - k) * pWinB + k * m.winB;
+      const s = pWinA + pDraw + pWinB;
+      if (s > 0) { pWinA /= s; pDraw /= s; pWinB /= s; }
+      market = { weight: k, nBooks: m.nBooks, date: m.date };
+    }
+  }
+
   scorelines.sort((x, y) => y.p - x.p);
   const topScores = scorelines.slice(0, 5).map((s) => ({
     score: `${s.a}-${s.b}`,
@@ -185,6 +202,7 @@ function summarizeGoals(teamA, teamB, h2h, w = {}) {
       '3.5': { over: pct(overUnder[3.5]), under: pct(1 - overUnder[3.5]) },
     },
     expectedTotal: round(lambdaA + lambdaB, 2),
+    market, // null o { weight, nBooks, date } si se mezcló con cuotas del mercado
   };
 }
 

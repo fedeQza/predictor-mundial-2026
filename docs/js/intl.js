@@ -4,6 +4,7 @@
 import { config, DEFAULT_RATING, REFERENCE_RATING, getTier } from './config.js';
 import { WORLD_CUP_TEAMS, getTeamName, repoNameToId } from './teams.js';
 import { setDcModel } from './dcModel.js';
+import { setOdds } from './odds.js';
 
 // --- CSV parser (mismo que server/dataset.js) -----------------------------------
 function parseCsv(text) {
@@ -37,16 +38,19 @@ let ratingsById = {};
 let ratingsByName = {};
 
 export async function loadData() {
-  const [csv, ratings, dc] = await Promise.all([
+  const [csv, ratings, dc, odds] = await Promise.all([
     fetch('data/international_results.csv').then((r) => r.text()),
     fetch('data/ratings.json').then((r) => r.json()),
     // Fuerzas ataque/defensa del modelo Dixon-Coles (opcional: si falta, el modelo cae al heuristico).
     fetch('data/dcParams.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    // Snapshot de cuotas del mercado (opcional: si falta, no se mezcla).
+    fetch('data/odds.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),
   ]);
   rows = parseCsv(csv);
   ratingsById = ratings.byId || {};
   ratingsByName = ratings.byName || {};
   setDcModel(dc);
+  setOdds(odds);
 }
 
 // --- helpers --------------------------------------------------------------------

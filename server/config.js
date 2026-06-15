@@ -95,4 +95,14 @@ export const config = {
   // Temperatura de calibracion de las probabilidades W/D/L. >1 suaviza (menos confianza),
   // <1 agudiza. Calibrada por backtest (npm run tune:temp). 1 = sin cambio.
   probTemp: num(process.env.PROB_TEMP, 1.0),
+
+  // --- Cuotas del mercado (blend offline) ---------------------------------------
+  // Si data/odds.json existe (snapshot bajado a mano con `npm run import:odds`), el modelo mezcla
+  // su 1X2 con las cuotas del mercado (el predictor mejor calibrado). La web NO consume la API:
+  // solo lee el snapshot. ODDS_WEIGHT = cuánto pesa el mercado (0..1); 0.6 = 60% mercado / 40%
+  // modelo (criterio razonable; no se puede backtestear sin cuotas históricas). USE_ODDS=0 lo apaga.
+  useOdds: (process.env.USE_ODDS ?? '1').trim() !== '0',
+  oddsWeight: num(process.env.ODDS_WEIGHT, 0.6),
+  // Clave de The Odds API (solo la usa scripts/importOdds.mjs; nunca el server en vivo).
+  oddsApiKey: (process.env.ODDS_API_KEY || '').trim(),
 };
