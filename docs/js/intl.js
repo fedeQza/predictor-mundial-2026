@@ -107,7 +107,7 @@ export function getProfile(id) {
     adjGoalsFor.push(gf * factor);
     adjGoalsAgainst.push(ga / factor);
     formPointsArr.push(result === 'W' ? 3 : result === 'D' ? 1 : 0);
-    recent.push({ result, goalsFor: gf, goalsAgainst: ga, opponent, opponentRating: oppRating, date: r.date });
+    recent.push({ result, goalsFor: gf, goalsAgainst: ga, opponent, opponentRating: oppRating, date: r.date, tournament: r.tournament });
   }
   const last5 = formPointsArr.slice(0, 5);
   const formPoints = last5.length ? average(last5) / 3 : 0.5;

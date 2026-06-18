@@ -29,24 +29,32 @@ function opponentFactor(opponentRating, opponentWeight = config.opponentWeight) 
 }
 
 // Mapeo de los "type" de API-Football a nuestras claves de metricas.
+// IMPORTANTE: API-Football suele devolver los 18 "type" presentes pero con value=null para
+// muchos partidos (p.ej. eliminatorias CAF de Senegal: solo trae tarjetas). Preservamos null
+// para distinguir "no hay dato" de un 0 real; asi no inventamos "0 tiros" donde falta cobertura.
 function mapStatistics(statsArray) {
   const get = (type) => {
     const found = statsArray.find((s) => s.type === type);
     const v = found ? found.value : null;
-    return typeof v === 'number' ? v : 0;
+    return typeof v === 'number' ? v : null;
   };
+  const yellow = get('Yellow Cards');
+  const red = get('Red Cards');
+  const cards = (yellow == null && red == null) ? null : (yellow ?? 0) + (red ?? 0);
   return {
     shots_on_goal: get('Shots on Goal'),
     total_shots: get('Total Shots'),
     corners: get('Corner Kicks'),
     fouls: get('Fouls'),
-    cards: get('Yellow Cards') + get('Red Cards'),
+    cards,
   };
 }
 
+// Promedio que ignora los partidos sin dato real para esa metrica. null si no hay ninguno
+// (asi el panel puede mostrar "sin datos" en vez de un 0 enganoso).
 function average(nums) {
   const valid = nums.filter((n) => typeof n === 'number');
-  if (valid.length === 0) return 0;
+  if (valid.length === 0) return null;
   return valid.reduce((s, n) => s + n, 0) / valid.length;
 }
 

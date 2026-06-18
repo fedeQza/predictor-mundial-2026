@@ -234,20 +234,30 @@ function buildLines(expectedTotal) {
 }
 
 function summarizeMetric(metric, teamA, teamB) {
-  const avgA = teamA.stats?.[metric] ?? 0;
-  const avgB = teamB.stats?.[metric] ?? 0;
-  const expectedTotal = avgA + avgB;
+  const rawA = teamA.stats?.[metric];
+  const rawB = teamB.stats?.[metric];
+  const hasA = typeof rawA === 'number';
+  const hasB = typeof rawB === 'number';
+  // La metrica solo tiene sentido si AMBOS equipos tienen el dato (el total esperado
+  // mezcla los dos). Si la API no cubre uno (p.ej. tiros de Senegal en eliminatorias CAF),
+  // se marca "sin datos" y se nombra el lado que falta, en vez de inventar un 0.
+  const available = hasA && hasB && (rawA + rawB) > 0;
+  const expectedTotal = available ? rawA + rawB : null;
+  const missing = [];
+  if (!hasA) missing.push('a');
+  if (!hasB) missing.push('b');
 
   return {
     key: metric,
     label: METRIC_LABELS[metric],
     perTeam: {
-      a: round(avgA, 2),
-      b: round(avgB, 2),
+      a: hasA ? round(rawA, 2) : null,
+      b: hasB ? round(rawB, 2) : null,
     },
-    expectedTotal: round(expectedTotal, 2),
-    lines: expectedTotal > 0 ? buildLines(expectedTotal) : [],
-    available: expectedTotal > 0,
+    expectedTotal: expectedTotal == null ? null : round(expectedTotal, 2),
+    lines: available ? buildLines(expectedTotal) : [],
+    available,
+    missing: missing.length ? missing : undefined,
   };
 }
 

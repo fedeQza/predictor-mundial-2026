@@ -325,6 +325,15 @@ function buildMetricCard(metric, nameA, nameB) {
   const card = document.createElement('div');
   card.className = 'card metric-card';
 
+  // Texto "sin datos" que nombra al/los equipo(s) que la API no cubre (p.ej. tiros de
+  // selecciones africanas en eliminatorias CAF, que API-Football no trae).
+  const missing = metric.missing || [];
+  let emptyNote = 'Sin datos suficientes para esta métrica.';
+  if (missing.length) {
+    const who = missing.map((s) => (s === 'a' ? nameA : nameB)).join(' y ');
+    emptyNote = `La API de fútbol no tiene esta estadística para ${who}.`;
+  }
+
   const linesHtml = (metric.available && metric.lines.length)
     ? metric.lines.map((l) => `
         <div class="metric-line">
@@ -335,14 +344,17 @@ function buildMetricCard(metric, nameA, nameB) {
           </span>
           <span class="line-vals">+${l.over}% / -${l.under}%</span>
         </div>`).join('')
-    : '<p class="muted">Sin datos suficientes para esta métrica.</p>';
+    : `<p class="muted">${emptyNote}</p>`;
+
+  const cell = (name, val) =>
+    `<div class="metric-team"><span class="muted">${name}</span><strong>${val == null ? 's/d' : val}</strong></div>`;
 
   card.innerHTML = `
     <h2>${metric.label}</h2>
     <div class="metric-expected">
-      <div class="metric-team"><span class="muted">${nameA}</span><strong>${metric.perTeam.a}</strong></div>
-      <div class="metric-team"><span class="muted">${nameB}</span><strong>${metric.perTeam.b}</strong></div>
-      <div class="metric-team total"><span class="muted">Total esperado</span><strong>${metric.expectedTotal}</strong></div>
+      ${cell(nameA, metric.perTeam.a)}
+      ${cell(nameB, metric.perTeam.b)}
+      <div class="metric-team total"><span class="muted">Total esperado</span><strong>${metric.expectedTotal == null ? 's/d' : metric.expectedTotal}</strong></div>
     </div>
     <div class="metric-lines">${linesHtml}</div>`;
   return card;
@@ -373,7 +385,10 @@ function renderForm(chipsId, listId, recent) {
 
     const rival = m.opponentRating != null ? `${m.opponent} (${m.opponentRating})` : m.opponent;
     const li = document.createElement('li');
-    li.innerHTML = `<span>${m.date} vs ${rival}</span><span>${m.goalsFor}-${m.goalsAgainst}</span>`;
+    const isWc = m.tournament === 'FIFA World Cup'; // solo la fase final, no las eliminatorias
+    if (isWc) li.className = 'recent-wc';
+    const tag = isWc ? ' <span class="wc-tag">★ Mundial</span>' : '';
+    li.innerHTML = `<span>${m.date} vs ${rival}${tag}</span><span>${m.goalsFor}-${m.goalsAgainst}</span>`;
     list.appendChild(li);
   });
 }

@@ -108,7 +108,7 @@ export function getIntlProfile(id, opponentWeight = config.opponentWeight, asOf 
     adjGoalsFor.push(gf * factor);
     adjGoalsAgainst.push(ga / factor);
     formPointsArr.push(result === 'W' ? 3 : result === 'D' ? 1 : 0);
-    recent.push({ result, goalsFor: gf, goalsAgainst: ga, opponent, opponentRating: oppRating, date: r.date });
+    recent.push({ result, goalsFor: gf, goalsAgainst: ga, opponent, opponentRating: oppRating, date: r.date, tournament: r.tournament });
   }
 
   const last5 = formPointsArr.slice(0, 5);

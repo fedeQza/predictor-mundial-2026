@@ -282,6 +282,16 @@ option { color: var(--text); }
   display: flex; justify-content: space-between;
   padding: 0.3rem 0; border-bottom: 1px solid var(--border); color: var(--muted);
 }
+/* Partidos del Mundial 2026: resaltados en dorado para distinguirlos del resto. */
+.recent-list li.recent-wc {
+  color: var(--draw); font-weight: 600;
+  border-left: 3px solid var(--draw); padding-left: 0.45rem;
+}
+.wc-tag {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.03em;
+  color: #2a2206; background: var(--draw);
+  padding: 0.05rem 0.35rem; border-radius: 0.4rem; margin-left: 0.35rem;
+}
 
 .muted { color: var(--muted); }
 .hidden { display: none; }
