@@ -289,7 +289,10 @@ function renderForm(chipsId, listId, recent) {
     chips.appendChild(chip);
     const rival = m.opponentRating != null ? `${m.opponent} (${m.opponentRating})` : m.opponent;
     const li = document.createElement('li');
-    li.innerHTML = `<span>${m.date} vs ${rival}</span><span>${m.goalsFor}-${m.goalsAgainst}</span>`;
+    const isWc = m.tournament === 'FIFA World Cup'; // solo la fase final, no las eliminatorias
+    if (isWc) li.className = 'recent-wc';
+    const tag = isWc ? ' <span class="wc-tag">★ Mundial</span>' : '';
+    li.innerHTML = `<span>${m.date} vs ${rival}${tag}</span><span>${m.goalsFor}-${m.goalsAgainst}</span>`;
     list.appendChild(li);
   });
 }
