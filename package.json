@@ -11,6 +11,7 @@
     "import:intl": "node scripts/importIntlResults.mjs",
     "compute:ratings": "node scripts/computeRatings.mjs",
     "backtest": "node scripts/backtest.mjs",
+    "report:wc": "node scripts/wcReport.mjs",
     "tune": "node scripts/tuneWeights.mjs",
     "tune:elo": "node --env-file=.env scripts/tuneElo.mjs",
     "fit:dc": "node scripts/fitDcModel.mjs",
