@@ -16,10 +16,13 @@
     "tune:elo": "node --env-file=.env scripts/tuneElo.mjs",
     "fit:dc": "node scripts/fitDcModel.mjs",
     "import:odds": "node --env-file=.env scripts/importOdds.mjs",
-    "build:dataset": "node --env-file=.env scripts/buildDataset.mjs"
+    "build:dataset": "node --env-file=.env scripts/buildDataset.mjs",
+    "notify": "node --env-file=.env scripts/notifyMatches.mjs"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "nodemailer": "^9.0.1",
+    "sharp": "^0.35.2"
   },
   "engines": {
     "node": ">=20.6.0"

@@ -15,6 +15,9 @@ cache/
 data/teams.csv
 data/matches.csv
 
+# Previews de los recordatorios (dry-run de npm run notify)
+notify-preview*.png
+
 # Sistema
 .DS_Store
 Thumbs.db
