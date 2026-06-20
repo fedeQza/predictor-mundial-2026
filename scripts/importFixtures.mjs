@@ -101,10 +101,14 @@ async function main() {
 
   fixtures.sort((a, b) => (a.kickoff < b.kickoff ? -1 : a.kickoff > b.kickoff ? 1 : 0));
 
+  // Idempotente: solo bumpear updatedAt si los cruces/horarios cambiaron, para que un cron no genere
+  // commits basura cuando el calendario no se movió.
+  const prev = (() => { try { return JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch { return null; } })();
+  const unchanged = prev && prev.source === src && JSON.stringify(prev.fixtures) === JSON.stringify(fixtures);
   const out = {
     _note: 'Generado por scripts/importFixtures.mjs desde un .ics. kickoff en UTC ISO. Re-corré npm run import:fixtures para actualizar.',
     source: src,
-    updatedAt: new Date().toISOString(),
+    updatedAt: unchanged ? prev.updatedAt : new Date().toISOString(),
     fixtures,
   };
   fs.writeFileSync(OUT, JSON.stringify(out, null, 2) + '\n');
