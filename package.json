@@ -16,6 +16,7 @@
     "tune:elo": "node --env-file=.env scripts/tuneElo.mjs",
     "fit:dc": "node scripts/fitDcModel.mjs",
     "import:odds": "node --env-file=.env scripts/importOdds.mjs",
+    "import:fixtures": "node scripts/importFixtures.mjs",
     "build:dataset": "node --env-file=.env scripts/buildDataset.mjs",
     "notify": "node --env-file=.env scripts/notifyMatches.mjs"
   },
