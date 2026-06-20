@@ -1,0 +1,43 @@
+name: Actualizar fixtures del Mundial
+
+# Re-importa el calendario (.ics de Sky Sports) y actualiza data/fixtures.json. Corre a diario: cuando
+# termina una fase y se definen los cruces de la siguiente (octavos, cuartos, etc.), Sky reemplaza los
+# placeholders ("Group A Winner"...) por las selecciones reales y esta corrida los incorpora. El
+# importador es idempotente (solo cambia el archivo si los cruces/horarios se movieron), así que no
+# genera commits cuando no hay novedad.
+on:
+  schedule:
+    - cron: '0 6 * * *'   # todos los días 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-fixtures
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Re-importar fixtures desde el calendario
+        run: node scripts/importFixtures.mjs
+
+      - name: Commit si cambiaron los cruces
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/fixtures.json
+          if git diff --staged --quiet; then
+            echo "Sin cambios en los cruces; no se commitea."
+          else
+            git commit -m "chore: actualizar fixtures del Mundial (auto)"
+            git push
+          fi
