@@ -115,12 +115,19 @@ function summarizeGoals(teamA, teamB, h2h) {
     }
   }
 
+  // Tabla de marcadores 0..4 x 0..4 (filas = goles de A, columnas = goles de B). Espejo de server/model.js.
+  const SCORE_GRID = 5;
+  const scoreMatrix = Array.from({ length: SCORE_GRID }, () => new Array(SCORE_GRID).fill(0));
+  for (const s of scorelines) {
+    if (s.a < SCORE_GRID && s.b < SCORE_GRID) scoreMatrix[s.a][s.b] = pct(s.p * norm);
+  }
+
   scorelines.sort((x, y) => y.p - x.p);
   const topScores = scorelines.slice(0, 5).map((s) => ({ score: `${s.a}-${s.b}`, prob: pct(s.p * norm) }));
   return {
     lambdaA: round(lambdaA, 2), lambdaB: round(lambdaB, 2),
     outcome: { winA: pct(pWinA), draw: pct(pDraw), winB: pct(pWinB) },
-    topScores, bothTeamsScore: pct(pBtts),
+    topScores, scoreMatrix, bothTeamsScore: pct(pBtts),
     overUnder: {
       '1.5': { over: pct(overUnder[1.5]), under: pct(1 - overUnder[1.5]) },
       '2.5': { over: pct(overUnder[2.5]), under: pct(1 - overUnder[2.5]) },

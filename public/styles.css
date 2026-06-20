@@ -225,15 +225,22 @@ option { color: var(--text); }
   font-size: 0.95rem;
 }
 
-.scorelines ul { list-style: none; padding: 0; margin: 0.4rem 0 0; display: flex; gap: 0.6rem; flex-wrap: wrap; }
-.scorelines li {
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  padding: 0.4rem 0.7rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
+/* Tabla heatmap de marcadores 0-4 (filas = goles A, columnas = goles B). */
+.score-matrix { margin-top: 0.5rem; }
+.matrix-legend { font-size: 0.78rem; color: var(--muted); margin: 0 0 0.5rem; }
+.matrix-legend .mx-key-a { color: var(--a); font-weight: 700; }
+.matrix-legend .mx-key-b { color: var(--b); font-weight: 700; }
+.score-matrix table { border-collapse: separate; border-spacing: 2px; width: 100%; table-layout: fixed; }
+.score-matrix th, .score-matrix td {
+  text-align: center; font-size: 0.72rem; padding: 0.4rem 0.1rem; border-radius: 6px;
+  font-variant-numeric: tabular-nums;
 }
-.scorelines li strong { color: var(--accent); }
+.score-matrix .mx-corner { background: transparent; }
+.score-matrix .mx-head { color: var(--muted); font-weight: 700; font-size: 0.78rem; background: var(--panel-2); }
+.score-matrix .mx-head-a { color: var(--a); }
+.score-matrix .mx-head-b { color: var(--b); }
+.score-matrix .mx-cell { color: var(--text); }
+.score-matrix .mx-top { outline: 2px solid var(--text); font-weight: 800; }
 
 .metric-expected { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .metric-team {
