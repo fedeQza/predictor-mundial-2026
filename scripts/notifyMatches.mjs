@@ -17,6 +17,9 @@ const FIXTURES = path.join(ROOT, 'data', 'fixtures.json');
 const LEDGER = path.join(ROOT, 'data', 'notified.json');
 
 const DRY_RUN = process.argv.includes('--dry-run');
+// --force: manda el próximo partido como PRUEBA, ignorando la ventana y SIN tocar el ledger (el
+// recordatorio real igual saldrá después). Sirve para verificar el envío/credenciales a demanda.
+const FORCE = process.argv.includes('--force');
 // Ventana de disparo (minutos antes del kickoff). Ancha para tolerar atrasos/saltos del cron de Actions;
 // el ledger evita duplicados aunque varias corridas caigan dentro.
 const WIN_MIN = 90;
@@ -88,16 +91,26 @@ async function main() {
   if (!ledger.sent) ledger.sent = {};
 
   const now = Date.now();
-  const due = fixtures.filter((f) => {
-    if (ledger.sent[fixtureKey(f)]) return false;
-    const t = new Date(f.kickoff).getTime();
-    if (!Number.isFinite(t)) return false;
-    const minsToKickoff = (t - now) / 60000;
-    return minsToKickoff >= WIN_MIN && minsToKickoff <= WIN_MAX;
-  });
+  let due;
+  if (FORCE) {
+    // Prueba: el próximo partido futuro, ignorando ventana y ledger.
+    due = fixtures
+      .filter((f) => new Date(f.kickoff).getTime() > now)
+      .sort((a, b) => (a.kickoff < b.kickoff ? -1 : 1))
+      .slice(0, 1);
+    console.log('[notify] --force: mando el próximo partido como PRUEBA (sin tocar el ledger).');
+  } else {
+    due = fixtures.filter((f) => {
+      if (ledger.sent[fixtureKey(f)]) return false;
+      const t = new Date(f.kickoff).getTime();
+      if (!Number.isFinite(t)) return false;
+      const minsToKickoff = (t - now) / 60000;
+      return minsToKickoff >= WIN_MIN && minsToKickoff <= WIN_MAX;
+    });
+  }
 
-  console.log(`[notify] ${new Date().toISOString()} · fixtures=${fixtures.length} · due=${due.length} · dryRun=${DRY_RUN}`);
-  if (due.length === 0) { console.log('[notify] nada para mandar en esta ventana.'); return; }
+  console.log(`[notify] ${new Date().toISOString()} · fixtures=${fixtures.length} · due=${due.length} · dryRun=${DRY_RUN} · force=${FORCE}`);
+  if (due.length === 0) { console.log('[notify] nada para mandar.'); return; }
 
   const smtp = smtpFromEnv();
   if (!DRY_RUN && !smtp) {
@@ -116,14 +129,15 @@ async function main() {
       fs.writeFileSync(out, built.png);
       console.log(`[notify][dry-run] ${f.home} vs ${f.away} → imagen escrita en ${out} (no se envió)`);
     } else {
-      const id = await sendEmail({ smtp, subject: built.subject, html: built.html, png: built.png });
+      const subject = FORCE ? `[PRUEBA] ${built.subject}` : built.subject;
+      const id = await sendEmail({ smtp, subject, html: built.html, png: built.png });
       console.log(`[notify] enviado ${f.home} vs ${f.away} → ${smtp.to} (messageId ${id})`);
-      ledger.sent[fixtureKey(f)] = new Date().toISOString();
+      if (!FORCE) ledger.sent[fixtureKey(f)] = new Date().toISOString(); // la prueba no marca el ledger
     }
     sent++;
   }
 
-  if (!DRY_RUN && sent > 0) {
+  if (!DRY_RUN && !FORCE && sent > 0) {
     fs.writeFileSync(LEDGER, JSON.stringify(ledger, null, 2) + '\n');
     console.log(`[notify] ledger actualizado (${Object.keys(ledger.sent).length} enviados en total).`);
   }

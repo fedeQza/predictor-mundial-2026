@@ -7,6 +7,11 @@ on:
   schedule:
     - cron: '*/15 * * * *'   # cada 15 min (UTC)
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Mandar un email de PRUEBA con el próximo partido (ignora la ventana de 2h y el ledger)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -35,7 +40,7 @@ jobs:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
-        run: node scripts/notifyMatches.mjs
+        run: node scripts/notifyMatches.mjs ${{ inputs.force && '--force' || '' }}
 
       - name: Commit del ledger si hubo envíos
         run: |
