@@ -212,13 +212,7 @@ function render(p, selectedMetric) {
   $('xgB').textContent = p.goals.lambdaB;
   $('btts').textContent = p.goals.bothTeamsScore + '%';
 
-  const topScores = $('topScores');
-  topScores.innerHTML = '';
-  p.goals.topScores.forEach((s) => {
-    const li = document.createElement('li');
-    li.innerHTML = `${s.score} <strong>${s.prob}%</strong>`;
-    topScores.appendChild(li);
-  });
+  renderScoreMatrix(p.goals.scoreMatrix, nameA, nameB);
 
   // Panel(es) de métrica
   renderMetrics(p, selectedMetric, nameA, nameB);
@@ -241,6 +235,56 @@ function render(p, selectedMetric) {
 function setBar(barId, valId, pctVal) {
   $(barId).style.width = pctVal + '%';
   $(valId).textContent = pctVal + '%';
+}
+
+// Tabla heatmap de marcadores 0-4 (filas = goles de A, columnas = goles de B). El color de cada
+// celda mezcla la zona (gana A / empate / gana B) con la intensidad según su probabilidad.
+const MX_COLORS = { a: [74, 158, 255], draw: [201, 162, 39], b: [255, 107, 107] }; // = --a / --draw / --b
+function mxCell(tag, text, cls) {
+  const el = document.createElement(tag);
+  el.textContent = text;
+  if (cls) el.className = cls;
+  return el;
+}
+function renderScoreMatrix(matrix, nameA, nameB) {
+  const host = $('scoreMatrix');
+  if (!host) return;
+  host.innerHTML = '';
+  if (!matrix || !matrix.length) return;
+
+  let max = 0, topA = 0, topB = 0;
+  matrix.forEach((row, a) => row.forEach((v, b) => { if (v > max) { max = v; topA = a; topB = b; } }));
+
+  const legend = document.createElement('p');
+  legend.className = 'matrix-legend';
+  legend.innerHTML = `Filas <span class="mx-key-a">${nameA}</span> ↓ · Columnas <span class="mx-key-b">${nameB}</span> →`;
+  host.appendChild(legend);
+
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const hr = document.createElement('tr');
+  hr.appendChild(mxCell('th', '', 'mx-corner'));
+  for (let b = 0; b < matrix[0].length; b++) hr.appendChild(mxCell('th', b, 'mx-head mx-head-b'));
+  thead.appendChild(hr);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  matrix.forEach((row, a) => {
+    const tr = document.createElement('tr');
+    tr.appendChild(mxCell('th', a, 'mx-head mx-head-a'));
+    row.forEach((v, b) => {
+      const td = mxCell('td', v > 0 ? v.toFixed(1) + '%' : '·', 'mx-cell');
+      const c = a > b ? MX_COLORS.a : a < b ? MX_COLORS.b : MX_COLORS.draw;
+      const alpha = max > 0 ? 0.06 + 0.84 * (v / max) : 0;
+      td.style.background = `rgba(${c[0]},${c[1]},${c[2]},${alpha.toFixed(3)})`;
+      td.title = `${nameA} ${a}-${b} ${nameB}: ${v}%`;
+      if (a === topA && b === topB) td.classList.add('mx-top');
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  host.appendChild(table);
 }
 
 function renderMarketNote(market) {

@@ -180,6 +180,14 @@ function summarizeGoals(teamA, teamB, h2h, w = {}) {
     }
   }
 
+  // Tabla de marcadores 0..4 x 0..4 (filas = goles de A, columnas = goles de B) para el heatmap.
+  // Son probabilidades de marcador exacto: no suman 100% porque se omiten los 5+ goles.
+  const SCORE_GRID = 5;
+  const scoreMatrix = Array.from({ length: SCORE_GRID }, () => new Array(SCORE_GRID).fill(0));
+  for (const s of scorelines) {
+    if (s.a < SCORE_GRID && s.b < SCORE_GRID) scoreMatrix[s.a][s.b] = pct(s.p * norm);
+  }
+
   scorelines.sort((x, y) => y.p - x.p);
   const topScores = scorelines.slice(0, 5).map((s) => ({
     score: `${s.a}-${s.b}`,
@@ -195,6 +203,7 @@ function summarizeGoals(teamA, teamB, h2h, w = {}) {
       winB: pct(pWinB),
     },
     topScores,
+    scoreMatrix,
     bothTeamsScore: pct(pBtts),
     overUnder: {
       '1.5': { over: pct(overUnder[1.5]), under: pct(1 - overUnder[1.5]) },
