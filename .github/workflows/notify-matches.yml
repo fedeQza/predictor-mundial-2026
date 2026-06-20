@@ -1,0 +1,50 @@
+name: Recordatorio de partidos (email)
+
+# ~2h antes de cada partido cargado en data/fixtures.json manda un email con la imagen de "resultados
+# posibles". El cron de Actions no es exacto: por eso el script usa una ventana de 90-150 min + un ledger
+# (data/notified.json) para mandar una sola vez aunque varias corridas caigan en el rango.
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # cada 15 min (UTC)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: notify-matches
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Disparar recordatorios en ventana
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: node scripts/notifyMatches.mjs
+
+      - name: Commit del ledger si hubo envíos
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/notified.json
+          if git diff --staged --quiet; then
+            echo "Sin envíos nuevos; no se commitea."
+          else
+            git commit -m "chore: recordatorios enviados (auto)"
+            git push
+          fi
