@@ -7395,10 +7395,10 @@ date,home,away,home_score,away_score,tournament,neutral
 2026-06-19,Brazil,Haiti,3,0,FIFA World Cup,TRUE
 2026-06-19,United States,Australia,2,0,FIFA World Cup,FALSE
 2026-06-19,Turkey,Paraguay,0,1,FIFA World Cup,TRUE
-2026-06-20,Germany,Ivory Coast,NA,NA,FIFA World Cup,TRUE
-2026-06-20,Ecuador,Curaçao,NA,NA,FIFA World Cup,TRUE
-2026-06-20,Netherlands,Sweden,NA,NA,FIFA World Cup,TRUE
-2026-06-20,Tunisia,Japan,NA,NA,FIFA World Cup,TRUE
+2026-06-20,Germany,Ivory Coast,2,1,FIFA World Cup,TRUE
+2026-06-20,Ecuador,Curaçao,0,0,FIFA World Cup,TRUE
+2026-06-20,Netherlands,Sweden,5,1,FIFA World Cup,TRUE
+2026-06-20,Tunisia,Japan,0,4,FIFA World Cup,TRUE
 2026-06-21,Belgium,Iran,NA,NA,FIFA World Cup,TRUE
 2026-06-21,New Zealand,Egypt,NA,NA,FIFA World Cup,TRUE
 2026-06-21,Spain,Saudi Arabia,NA,NA,FIFA World Cup,TRUE
