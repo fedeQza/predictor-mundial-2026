@@ -1,7 +1,7 @@
 {
   "_note": "Generado por scripts/importFixtures.mjs desde un .ics. kickoff en UTC ISO. Re-corré npm run import:fixtures para actualizar.",
   "source": "https://www.skysports.com/calendars/football/fixtures/competitions/fifa-world-cup",
-  "updatedAt": "2026-06-20T23:40:33.833Z",
+  "updatedAt": "2026-06-25T09:20:36.169Z",
   "fixtures": [
     {
       "kickoff": "2026-06-11T19:00:00Z",
@@ -433,6 +433,12 @@
       "kickoff": "2026-06-28T02:00:00Z",
       "home": "Jordan",
       "away": "Argentina",
+      "tournament": "FIFA World Cup"
+    },
+    {
+      "kickoff": "2026-06-28T19:00:00Z",
+      "home": "South Africa",
+      "away": "Canada",
       "tournament": "FIFA World Cup"
     }
   ]
