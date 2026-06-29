@@ -1,7 +1,7 @@
 {
   "_note": "Generado por scripts/importFixtures.mjs desde un .ics. kickoff en UTC ISO. Re-corré npm run import:fixtures para actualizar.",
   "source": "https://www.skysports.com/calendars/football/fixtures/competitions/fifa-world-cup",
-  "updatedAt": "2026-06-28T08:50:24.096Z",
+  "updatedAt": "2026-06-29T10:57:55.543Z",
   "fixtures": [
     {
       "kickoff": "2026-06-11T19:00:00Z",
@@ -472,9 +472,45 @@
       "tournament": "FIFA World Cup"
     },
     {
+      "kickoff": "2026-07-01T01:00:00Z",
+      "home": "Mexico",
+      "away": "Ecuador",
+      "tournament": "FIFA World Cup"
+    },
+    {
+      "kickoff": "2026-07-01T16:00:00Z",
+      "home": "England",
+      "away": "DR Congo",
+      "tournament": "FIFA World Cup"
+    },
+    {
+      "kickoff": "2026-07-01T20:00:00Z",
+      "home": "Belgium",
+      "away": "Senegal",
+      "tournament": "FIFA World Cup"
+    },
+    {
       "kickoff": "2026-07-02T00:00:00Z",
       "home": "United States",
       "away": "Bosnia and Herzegovina",
+      "tournament": "FIFA World Cup"
+    },
+    {
+      "kickoff": "2026-07-02T19:00:00Z",
+      "home": "Spain",
+      "away": "Austria",
+      "tournament": "FIFA World Cup"
+    },
+    {
+      "kickoff": "2026-07-02T23:00:00Z",
+      "home": "Portugal",
+      "away": "Croatia",
+      "tournament": "FIFA World Cup"
+    },
+    {
+      "kickoff": "2026-07-03T03:00:00Z",
+      "home": "Switzerland",
+      "away": "Algeria",
       "tournament": "FIFA World Cup"
     },
     {
@@ -487,6 +523,12 @@
       "kickoff": "2026-07-03T22:00:00Z",
       "home": "Argentina",
       "away": "Cape Verde",
+      "tournament": "FIFA World Cup"
+    },
+    {
+      "kickoff": "2026-07-04T01:30:00Z",
+      "home": "Colombia",
+      "away": "Ghana",
       "tournament": "FIFA World Cup"
     }
   ]
