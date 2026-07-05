@@ -7451,11 +7451,12 @@ date,home,away,home_score,away_score,tournament,neutral
 2026-07-03,Australia,Egypt,1,1,FIFA World Cup,TRUE
 2026-07-03,Argentina,Cape Verde,3,2,FIFA World Cup,TRUE
 2026-07-03,Colombia,Ghana,1,0,FIFA World Cup,TRUE
-2026-07-04,Canada,Morocco,NA,NA,FIFA World Cup,TRUE
-2026-07-04,Paraguay,France,NA,NA,FIFA World Cup,TRUE
+2026-07-04,Canada,Morocco,0,3,FIFA World Cup,TRUE
+2026-07-04,Paraguay,France,0,1,FIFA World Cup,TRUE
 2026-07-05,Brazil,Norway,NA,NA,FIFA World Cup,TRUE
 2026-07-05,Mexico,England,NA,NA,FIFA World Cup,FALSE
 2026-07-06,Portugal,Spain,NA,NA,FIFA World Cup,TRUE
 2026-07-06,United States,Belgium,NA,NA,FIFA World Cup,FALSE
 2026-07-06,Argentina,Egypt,NA,NA,FIFA World Cup,TRUE
 2026-07-06,Switzerland,Colombia,NA,NA,FIFA World Cup,TRUE
+2026-07-09,France,Morocco,NA,NA,FIFA World Cup,TRUE
