@@ -3647,7 +3647,7 @@ date,home,away,home_score,away_score,tournament,neutral
 2018-02-26,Saudi Arabia,Moldova,3,0,Friendly,FALSE
 2018-02-28,Iraq,Saudi Arabia,4,1,Friendly,FALSE
 2018-03-17,Iran,Sierra Leone,4,0,Friendly,FALSE
-2018-03-21,Iraq,Qatar,2,3,Friendly,FALSE
+2018-03-21,Iraq,Qatar,2,3,International Friendship Championship,FALSE
 2018-03-21,Jordan,Kuwait,1,0,Friendly,FALSE
 2018-03-21,South Africa,Angola,1,1,Friendly,TRUE
 2018-03-22,Algeria,Tanzania,4,1,Friendly,FALSE
@@ -3676,7 +3676,7 @@ date,home,away,home_score,away_score,tournament,neutral
 2018-03-24,Canada,New Zealand,1,0,Friendly,TRUE
 2018-03-24,Ivory Coast,Togo,2,2,Friendly,TRUE
 2018-03-24,Northern Ireland,South Korea,2,1,Friendly,FALSE
-2018-03-24,Qatar,Syria,2,2,Friendly,TRUE
+2018-03-24,Qatar,Syria,2,2,International Friendship Championship,TRUE
 2018-03-24,Sweden,Chile,1,2,Friendly,FALSE
 2018-03-24,Zambia,South Africa,0,2,Friendly,FALSE
 2018-03-26,Albania,Norway,0,1,Friendly,FALSE
@@ -3692,7 +3692,7 @@ date,home,away,home_score,away_score,tournament,neutral
 2018-03-27,Germany,Brazil,0,1,Friendly,FALSE
 2018-03-27,Greece,Egypt,1,0,Friendly,TRUE
 2018-03-27,Hungary,Scotland,0,1,Friendly,FALSE
-2018-03-27,Iraq,Syria,1,1,Friendly,FALSE
+2018-03-27,Iraq,Syria,1,1,International Friendship Championship,FALSE
 2018-03-27,Jordan,Vietnam,1,1,AFC Asian Cup qualification,FALSE
 2018-03-27,Luxembourg,Austria,0,4,Friendly,FALSE
 2018-03-27,Mexico,Croatia,0,1,Friendly,TRUE
